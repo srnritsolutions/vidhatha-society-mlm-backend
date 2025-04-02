@@ -34,10 +34,10 @@ public class Earnings implements Serializable
 	private Double totalEarnings;
 	
 	@Column(name = "WITHDRAWABLE_AMOUNT")
-	private Double withdrawableAmout;
+	private Double withdrawableAmount;
 	
 	@Column(name = "AVAILABLE_AMOUNT")
-	private Double availableAmout;
+	private Double availableAmount;
 	
 	@OneToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name = "USER_ID",referencedColumnName = "USER_ID")
