@@ -4,6 +4,9 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
 import com.srnr.vidhatasocietymlm.appconstants.Role;
 import com.srnr.vidhatasocietymlm.util.CustomeIdGenerator;
 
@@ -53,10 +56,12 @@ public class User implements Serializable
 	@Column(name = "IS_ACTIVE")
 	private Boolean isActive;
 	
-	@Column(name = "CREATEDAT")
+	@CreationTimestamp
+	@Column(name = "CREATEDAT",updatable = false,nullable = false)
 	private LocalDateTime createdAt;
 	
-	@Column(name = "UPDATEDAT")
+	@UpdateTimestamp
+	@Column(name = "UPDATEDAT",insertable = false,nullable = false)
 	private LocalDateTime updatedAt;
 	
 	@Column(name = "ROLE")
