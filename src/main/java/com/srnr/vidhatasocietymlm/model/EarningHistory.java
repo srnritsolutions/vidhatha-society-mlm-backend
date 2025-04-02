@@ -27,10 +27,10 @@ public class EarningHistory implements Serializable
 	private String id;
 	
 	@Column(name = "REFERRED_FROM",length = 100)
-	private String reffredFrom;
+	private String referredFrom;
 	
 	@Column(name = "REFERRED_TO",length = 100)
-	private String refferedTo;
+	private String referredTo;
 	
 	@Column(name = "USERID")
 	private String userId;

@@ -71,6 +71,8 @@ public class User implements Serializable
 	@Column(name = "REWARD",length = 30)
 	private String reward;
 	
+	private Boolean termsAndConditions;
+	
 	@OneToOne(mappedBy = "user",cascade = {CascadeType.MERGE,CascadeType.PERSIST})
 	private Address addresses;
 	

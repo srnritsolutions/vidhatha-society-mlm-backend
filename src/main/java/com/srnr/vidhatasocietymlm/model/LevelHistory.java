@@ -32,7 +32,7 @@ public class LevelHistory implements Serializable
 	private String userId;
 	
 	@Column(name = "LEVEL_NUM",length = 20)
-	private String leveNum;
+	private String levelNum;
 	
 	@Column(name = "REWARD_NAME",length = 30)
 	private String rewardName;

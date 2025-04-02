@@ -1,7 +1,7 @@
 package com.srnr.vidhatasocietymlm.model;
 
 import java.io.Serializable;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 import com.srnr.vidhatasocietymlm.util.CustomeIdGenerator;
 
@@ -44,7 +44,7 @@ public class Address implements Serializable
 	private String fullAddress;
 	
 	@Column(name = "DOB",length = 30)
-	private LocalDateTime dob;
+	private LocalDate dob;
 	
 	@OneToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name = "USER_ID",referencedColumnName = "USER_ID")
