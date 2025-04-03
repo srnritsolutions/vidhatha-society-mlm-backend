@@ -1,5 +1,11 @@
 package com.srnr.vidhatasocietymlm.user.dao;
 
-public interface UserDAO {
+import java.util.Optional;
+
+import com.srnr.vidhatasocietymlm.model.User;
+
+public interface UserDAO 
+{
+	Optional<User> saveUser(User user,String referralCode);
 
 }
