@@ -52,4 +52,8 @@ public class Earnings implements Serializable
 		}
 	}
 
+	public Earnings(User parent) {
+		// TODO Auto-generated constructor stub
+	}
+
 }
