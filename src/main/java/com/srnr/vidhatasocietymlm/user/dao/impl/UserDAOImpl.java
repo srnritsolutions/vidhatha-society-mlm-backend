@@ -1,6 +1,7 @@
 package com.srnr.vidhatasocietymlm.user.dao.impl;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,6 +10,7 @@ import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
+
 import com.srnr.vidhatasocietymlm.appconstants.Role;
 import com.srnr.vidhatasocietymlm.exception.customexceptions.InvalidReferralException;
 import com.srnr.vidhatasocietymlm.exception.customexceptions.UserAlreadyExistEmailException;
@@ -17,6 +19,7 @@ import com.srnr.vidhatasocietymlm.exception.customexceptions.UserNotFoundExcepti
 import com.srnr.vidhatasocietymlm.model.Earnings;
 import com.srnr.vidhatasocietymlm.model.Referral;
 import com.srnr.vidhatasocietymlm.model.User;
+import com.srnr.vidhatasocietymlm.repository.EarningsRepository;
 import com.srnr.vidhatasocietymlm.repository.ReferralRepository;
 import com.srnr.vidhatasocietymlm.repository.UserRepository;
 import com.srnr.vidhatasocietymlm.user.dao.UserDAO;
@@ -32,6 +35,9 @@ public class UserDAOImpl implements UserDAO
 	
 	@Autowired
 	private ReferralRepository referralRepository;
+	
+	@Autowired
+	private EarningsRepository earningsRepository;
 
 	@Transactional
 	@Retryable(retryFor = {PessimisticLockingFailureException.class},
@@ -39,21 +45,18 @@ public class UserDAOImpl implements UserDAO
 			   backoff = @Backoff(delay = 3000) )
 	@Override
 	public Optional<User> saveUser(User user, String referralCode)//sujit +without ref
-	{
-		
+	{	
 		User savedUser=null;
         if (user == null) 
         {
             logger.error("User cannot be null!");
             throw new UserNotFoundException("User cannot be null!");
         }
-
         if (userRepository.findByEmail(user.getEmail()).isPresent()) 
         {
             logger.warn("User already exists with email: {}", user.getEmail());
             throw new UserAlreadyExistEmailException("User already exists with email: " + user.getEmail());
         }
-
         if (userRepository.findByPhoneNumber(user.getPhoneNumber()).isPresent()) 
         {
             logger.warn("User already exists with phone number: {}", user.getPhoneNumber());
@@ -61,21 +64,25 @@ public class UserDAOImpl implements UserDAO
         }
 
         Earnings earnings = new Earnings();
+        
         Referral referral = new Referral();
+        
         user.setIsActive(false);
         user.setProfileImage("default.png");
         user.setPaymentSuccess(false);
         user.setUserLevel(0);
+        earnings.setUser(user);
+        referral.setUser(user);
         user.setEarnings(earnings);
         user.setReferral(referral);
         user.setRole(Role.USER);
-
+        
+        earnings.setUser(user);
+        referral.setUser(user);
         logger.info("User registration initiated for email: {}", user.getEmail());
-
         if (referralCode != null && !referralCode.isBlank()) 
         {
             logger.debug("Validating referral code: {}", referralCode);
-
             // Retrieve Parent User by Referral Code
             Referral parentReferral = referralRepository.findByReferalCode(referralCode)
                     .orElseThrow(() -> {
@@ -83,40 +90,98 @@ public class UserDAOImpl implements UserDAO
                         return new InvalidReferralException("Invalid referral code : "+referralCode);
                                        }
                                 );
-
             User parentUser = parentReferral.getUser();
-
             // lock parentUser record
             parentUser = userRepository.lockByUserId(parentUser.getId())
                     .orElseThrow(() -> {
                         logger.error("ParentUser not found with referral code: {}", referralCode);
                         return new RuntimeException("ParentUser does not exist with referralCode: " + referralCode);
                     });
-
-            if (!parentReferral.getIsActive()) {
-                logger.warn("Referral code {} is inactive", referralCode);
+            if (!parentReferral.getIsActive()) 
+            {
+                logger.error("Referral code {} is inactive", referralCode);
                 throw new IllegalStateException("Referral code is inactive.");
             }
-
             user.setParent(parentUser);
             parentUser.getChildren().add(user);
 
             if (parentUser.getChildren().size() == 3) {
                 parentUser.setIsActive(false);
             }
-
             savedUser=userRepository.save(user);
             logger.info("Congratulation {} , your registration successful with referal code : {}",savedUser.getName(),referralCode);
         }
-
-        else {
+        else 
+        {
         	savedUser = userRepository.save(user);
         	logger.info("Congratulation {}, your registration successful...",savedUser.getName());
-		}
-        
-       return savedUser!=null?Optional.of(savedUser):Optional.empty(); 
-        
-        
+		}  
+       return savedUser!=null?Optional.of(savedUser):Optional.empty();     
     }
+
+	@Override
+	@Transactional
+	public Optional<User> updateUserAfterPaymentSuccess(String userId, boolean paymentSuccess) 
+	{
+        if (!paymentSuccess) 
+        {
+            logger.warn("User update is not possible due to unsuccessful payment for userId: {}", userId);
+            throw new RuntimeException("User update is not possible due to unsuccessful payment");
+        }
+
+        if (userId == null || userId.isBlank()) 
+        {
+            throw new IllegalArgumentException("User ID cannot be null or blank");
+        }
+
+        Optional<User> optionalUser = this.userRepository.findById(userId);
+        if (optionalUser.isEmpty()) {
+            throw new RuntimeException("User not found with ID: " + userId);
+        }
+
+        User user = optionalUser.get();
+        User parent = user.getParent();
+        String referralCode = UUID.randomUUID().toString().replace("-", "").substring(0, 5);
+
+        if (parent != null) 
+        {
+            parent = userRepository.lockByUserId(parent.getId()).orElseThrow(() -> 
+                new IllegalStateException("Parent not found"));
+
+            if (parent.getChildren().size() == 3) 
+            {
+                // Update referral status
+                Referral referral = parent.getReferral();
+                if (referral != null) 
+                {
+                    referral.setIsActive(false);
+                    referralRepository.save(referral);
+                }
+
+                // Update earnings
+                Earnings earnings = earningsRepository.findById(parent.getId())
+                        .orElse(new Earnings(parent));
+                double earningsAmount = 250.0; // Example earnings calculation
+                earnings.setTotalEarnings(earnings.getTotalEarnings() + earningsAmount);
+                earningsRepository.save(earnings);
+            }
+        }
+
+        user.setPaymentSuccess(true);
+        user.setIsActive(true);
+
+        // Create and save referral
+        Referral userReferral = new Referral();
+        userReferral.setReferalCode(referralCode);
+        userReferral.setUser(user);
+        userReferral.setIsActive(true);
+        referralRepository.save(userReferral);
+
+        user.setReferral(userReferral);
+        userRepository.save(user);
+
+        return Optional.of(user);
+    }
+	
 }
 
