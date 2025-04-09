@@ -61,7 +61,7 @@ public class User implements Serializable
 	private LocalDateTime createdAt;
 	
 	@UpdateTimestamp
-	@Column(name = "UPDATEDAT",insertable = false,nullable = false)
+	@Column(name = "UPDATEDAT",insertable = false)
 	private LocalDateTime updatedAt;
 	
 	@Column(name = "ROLE")
