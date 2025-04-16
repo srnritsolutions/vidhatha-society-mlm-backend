@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.srnr.vidhatasocietymlm.exception.customexceptions.UserNotFoundException;
 import com.srnr.vidhatasocietymlm.exception.customexceptions.UserNotcreatedException;
 import com.srnr.vidhatasocietymlm.mapper.DTOToEntity;
 import com.srnr.vidhatasocietymlm.mapper.EntityToDTO;
@@ -75,7 +76,31 @@ public class UserServiceImpl implements UserService
 			logger.warn("Someone is already using this referral code. Please try again some time");
 			throw new RuntimeException("Someone is already using this referral code. Please try again some time");
 		}
-	
+	    
 	}
+
+
+	@Override
+	public String updateUserAfterPaymentSuccess(String userId, boolean paymentSuccess) 
+	{
+		if(userId!=null &&  ! userId.isBlank())
+		{
+			Optional<User> updateUser = this.userDAO.updateUserAfterPaymentSuccess(userId, paymentSuccess);
+			if(updateUser.isPresent())
+			{
+				return "Payment Successfull with User Id :  "+userId;
+			}
+			else
+			{
+				throw new RuntimeException("Something went problem ,try again after some time !");
+			}
+		}
+		else
+		{
+			throw new RuntimeException("user id can't be null or blank");
+		}
+	}
+	
+	
 
 }
