@@ -11,6 +11,7 @@ import com.srnr.vidhatasocietymlm.exception.customexceptions.UserNotcreatedExcep
 import com.srnr.vidhatasocietymlm.mapper.DTOToEntity;
 import com.srnr.vidhatasocietymlm.mapper.EntityToDTO;
 import com.srnr.vidhatasocietymlm.model.User;
+
 import com.srnr.vidhatasocietymlm.user.dao.UserDAO;
 import com.srnr.vidhatasocietymlm.user.dto.RegistrationRequestDTO;
 import com.srnr.vidhatasocietymlm.user.dto.UserResponseDTO;

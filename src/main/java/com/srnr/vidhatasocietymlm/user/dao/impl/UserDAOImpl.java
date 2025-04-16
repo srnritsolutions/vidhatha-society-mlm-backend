@@ -25,43 +25,41 @@ import com.srnr.vidhatasocietymlm.repository.UserRepository;
 import com.srnr.vidhatasocietymlm.user.dao.UserDAO;
 
 import jakarta.transaction.Transactional;
+
 @Component
-public class UserDAOImpl implements UserDAO
-{
+public class UserDAOImpl implements UserDAO {
 	private static final Logger logger = LoggerFactory.getLogger(UserDAOImpl.class);
-	
+
 	@Autowired
 	private UserRepository userRepository;
-	
+
 	@Autowired
 	private ReferralRepository referralRepository;
-	
+
 	@Autowired
 	private EarningsRepository earningsRepository;
 
 	@Transactional
-	@Retryable(retryFor = {PessimisticLockingFailureException.class},
-			   maxAttempts =3,
-			   backoff = @Backoff(delay = 3000) )
+	@Retryable(retryFor = {
+			PessimisticLockingFailureException.class }, maxAttempts = 3, backoff = @Backoff(delay = 3000))
 	@Override
-	public Optional<User> saveUser(User user, String referralCode)//sujit +without ref
-	{	
-		User savedUser=null;
-        if (user == null) 
-        {
-            logger.error("User cannot be null!");
-            throw new UserNotFoundException("User cannot be null!");
-        }
-        if (userRepository.findByEmail(user.getEmail()).isPresent()) 
-        {
-            logger.warn("User already exists with email: {}", user.getEmail());
-            throw new UserAlreadyExistEmailException("User already exists with email: " + user.getEmail());
-        }
-        if (userRepository.findByPhoneNumber(user.getPhoneNumber()).isPresent()) 
-        {
-            logger.warn("User already exists with phone number: {}", user.getPhoneNumber());
-            throw new UserAlreadyExistPhoneNumberException("User already exists with this phone number: " + user.getPhoneNumber());
-        }
+	public Optional<User> saveUser(User user, String referralCode)// sujit +without ref
+	{
+		User savedUser = null;
+		if (user == null) {
+			logger.error("User cannot be null!");
+			throw new UserNotFoundException("User cannot be null!");
+		}
+		if (userRepository.findByEmail(user.getEmail()).isPresent()) {
+			logger.warn("User already exists with email: {}", user.getEmail());
+			throw new UserAlreadyExistEmailException("User already exists with email: " + user.getEmail());
+		}
+		if (userRepository.findByPhoneNumber(user.getPhoneNumber()).isPresent()) {
+			logger.warn("User already exists with phone number: {}", user.getPhoneNumber());
+			throw new UserAlreadyExistPhoneNumberException(
+					"User already exists with this phone number: " + user.getPhoneNumber());
+		}
+
 
         Earnings earnings = new Earnings();
         
@@ -124,6 +122,8 @@ public class UserDAOImpl implements UserDAO
        return savedUser!=null?Optional.of(savedUser):Optional.empty();     
     }
 
+
+
 	@Override
 	@Transactional
 	public Optional<User> updateUserAfterPaymentSuccess(String userId, boolean paymentSuccess) 
@@ -160,7 +160,7 @@ public class UserDAOImpl implements UserDAO
                 if (referral != null) 
                 {
                     referral.setIsActive(false);
-                    referralRepository.save(referral);
+                  referralRepository.save(referral);
                 }
 
                 // Update earnings
@@ -187,6 +187,5 @@ public class UserDAOImpl implements UserDAO
 
         return Optional.of(user);
     }
-	
-}
 
+}
