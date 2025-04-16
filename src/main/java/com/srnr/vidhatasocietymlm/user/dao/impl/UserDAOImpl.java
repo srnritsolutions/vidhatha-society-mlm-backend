@@ -102,14 +102,19 @@ public class UserDAOImpl implements UserDAO
                 logger.error("Referral code {} is inactive", referralCode);
                 throw new IllegalStateException("Referral code is inactive.");
             }
-            user.setParent(parentUser);
-            parentUser.getChildren().add(user);
-
-            if (parentUser.getChildren().size() == 3) {
-                parentUser.setIsActive(false);
+            if(parentUser.getChildren().size()<=3)
+            {
+            	user.setParent(parentUser);
+                parentUser.getChildren().add(user);
+                
+                if (parentUser.getChildren().size() == 3) 
+                {
+                    parentUser.getReferral().setIsActive(false);
+                }
+                savedUser=userRepository.save(user);
+                logger.info("Congratulation {} , your registration successful with referal code : {}",savedUser.getName(),referralCode);
+                
             }
-            savedUser=userRepository.save(user);
-            logger.info("Congratulation {} , your registration successful with referal code : {}",savedUser.getName(),referralCode);
         }
         else 
         {
