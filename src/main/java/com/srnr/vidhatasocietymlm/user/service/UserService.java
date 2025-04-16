@@ -6,4 +6,5 @@ import com.srnr.vidhatasocietymlm.user.dto.UserResponseDTO;
 public interface UserService 
 {
       UserResponseDTO registerUser(RegistrationRequestDTO registrationRequestDTO);
+      String updateUserAfterPaymentSuccess(String userId,boolean paymentSuccess);
 }
