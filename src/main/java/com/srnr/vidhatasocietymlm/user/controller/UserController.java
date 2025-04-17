@@ -47,10 +47,8 @@ public class UserController {
 		return ResponseEntity.ok("OTP Verification API is working");
 	}
 
-	@PostMapping(value = "/UpdateUserAfterPayment", 
-			consumes = { MediaType.APPLICATION_JSON_VALUE }, 
-			produces = {MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<?> updateUserAfterPayment(@Valid @RequestParam String userId,@RequestParam boolean paymentSuccess )
+	@PostMapping(value = "/UpdateUserAfterPayment")
+	public ResponseEntity<?> updateUserAfterPayment(@RequestParam String userId,@RequestParam boolean paymentSuccess )
 	{
 		String updateUserAfterPaymentSuccess = this.userService.updateUserAfterPaymentSuccess(userId, paymentSuccess);
 		return ResponseEntity.status(HttpStatus.OK).body(updateUserAfterPaymentSuccess);
