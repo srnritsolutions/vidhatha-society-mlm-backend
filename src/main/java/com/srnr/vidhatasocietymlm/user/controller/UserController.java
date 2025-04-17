@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.srnr.vidhatasocietymlm.user.dto.EmailRequestDTO;
@@ -25,7 +26,7 @@ public class UserController {
 	private UserService userService;
 
 	@PostMapping(value = "/create", consumes = { MediaType.APPLICATION_JSON_VALUE }, 
-			                         produces = {MediaType.APPLICATION_JSON_VALUE })
+			produces = {MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<?> createUser(@Valid @RequestBody RegistrationRequestDTO registrationRequestDTO)
 	{
 		UserResponseDTO registerUser = this.userService.registerUser(registrationRequestDTO);
@@ -33,17 +34,26 @@ public class UserController {
 	}
 
 	@PostMapping(value = "/verifyEmail", consumes = { MediaType.APPLICATION_JSON_VALUE }, 
-			                              produces = {MediaType.APPLICATION_JSON_VALUE })
+			produces = {MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<?> verifyEmail(@Valid @RequestBody EmailRequestDTO emailRequestDTO)
 	{
 		return ResponseEntity.ok("Email Verification API is Working");
 	}
 
 	@PostMapping(value = "/VerifyOTP", consumes = { MediaType.APPLICATION_JSON_VALUE }, 
-			                            produces = {MediaType.APPLICATION_JSON_VALUE })
+			produces = {MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<?> verifyOTP(@Valid @RequestBody VerifyOTPRequestDTO verifyOTPRequestDTO) 
 	{
 		return ResponseEntity.ok("OTP Verification API is working");
+	}
+
+	@PostMapping(value = "/UpdateUserAfterPayment", 
+			consumes = { MediaType.APPLICATION_JSON_VALUE }, 
+			produces = {MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<?> updateUserAfterPayment(@Valid @RequestParam String userId,@RequestParam boolean paymentSuccess )
+	{
+		String updateUserAfterPaymentSuccess = this.userService.updateUserAfterPaymentSuccess(userId, paymentSuccess);
+		return ResponseEntity.status(HttpStatus.OK).body(updateUserAfterPaymentSuccess);
 	}
 
 }
