@@ -1,5 +1,6 @@
 package com.srnr.vidhatasocietymlm.user.dao.impl;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -29,7 +30,7 @@ import jakarta.transaction.Transactional;
 @Component
 public class UserDAOImpl implements UserDAO {
 	private static final Logger logger = LoggerFactory.getLogger(UserDAOImpl.class);
-
+	private static final double REFERRAL_EARNING_AMOUNT = 750.0;
 	@Autowired
 	private UserRepository userRepository;
 
@@ -128,64 +129,94 @@ public class UserDAOImpl implements UserDAO {
 	@Transactional
 	public Optional<User> updateUserAfterPaymentSuccess(String userId, boolean paymentSuccess) 
 	{
-        if (!paymentSuccess) 
-        {
-            logger.warn("User update is not possible due to unsuccessful payment for userId: {}", userId);
-            throw new RuntimeException("User update is not possible due to unsuccessful payment");
-        }
+	    if (!paymentSuccess) 
+	    {
+	        logger.warn("User update is not possible due to unsuccessful payment for userId: {}", userId);
+	        throw new RuntimeException("User update is not possible due to unsuccessful payment");
+	    }
+	    Objects.requireNonNull(userId, "User ID cannot be null");
+	    if (userId.isBlank()) {
+	        throw new IllegalArgumentException("User ID cannot be null or blank");
+	    }
 
-        if (userId == null || userId.isBlank()) 
-        {
-            throw new IllegalArgumentException("User ID cannot be null or blank");
-        }
+	    Optional<User> optionalUser = this.userRepository.findById(userId);
+	    System.err.println(optionalUser.get());
+	    if (optionalUser.isEmpty()) 
+	    {
+	        throw new RuntimeException("User not found with ID: " + userId);
+	    }
 
-        Optional<User> optionalUser = this.userRepository.findById(userId);
-        if (optionalUser.isEmpty()) {
-            throw new RuntimeException("User not found with ID: " + userId);
-        }
+	    User user = optionalUser.get();
+//	    User parent = user.getParent();
+	    String referralCode = UUID.randomUUID().toString().replace("-", "").substring(0, 5);
 
-        User user = optionalUser.get();
-        User parent = user.getParent();
-        String referralCode = UUID.randomUUID().toString().replace("-", "").substring(0, 5);
+	    if (user.getParent() != null) 
+	    {
+	    	String parentId = user.getParent().getId();
+	       User parent = userRepository.lockByUserId(parentId).orElseThrow(() -> 
+	            new IllegalStateException("Parent not found")); 
 
-        if (parent != null) 
-        {
-            parent = userRepository.lockByUserId(parent.getId()).orElseThrow(() -> 
-                new IllegalStateException("Parent not found"));
+	        int childrenCount = parent.getChildren().size();
 
-            if (parent.getChildren().size() == 3) 
-            {
-                // Update referral status
-                Referral referral = parent.getReferral();
-                if (referral != null) 
-                {
-                    referral.setIsActive(false);
-                  referralRepository.save(referral);
-                }
 
-                // Update earnings
-                Earnings earnings = earningsRepository.findById(parent.getId())
-                        .orElse(new Earnings(parent));
-                double earningsAmount = 250.0; // Example earnings calculation
-                earnings.setTotalEarnings(earnings.getTotalEarnings() + earningsAmount);
-                earningsRepository.save(earnings);
-            }
-        }
+	        if (childrenCount < 3) 
+	        {
+	            // Add the user as a child to the parent
+	            parent.getChildren().add(user);
+	            user.setParent(parent);
+	            userRepository.save(parent);
+	        }
 
-        user.setPaymentSuccess(true);
-        user.setIsActive(true);
+	        if (childrenCount == 3) 
+	        {
+	            // Deactivate the referral
+	            Referral referral = parent.getReferral();
+	            if (referral != null) {
+	                referral.setIsActive(false);
+	                referralRepository.save(referral);
+	            }
 
-        // Create and save referral
-        Referral userReferral = new Referral();
-        userReferral.setReferalCode(referralCode);
-        userReferral.setUser(user);
-        userReferral.setIsActive(true);
-        referralRepository.save(userReferral);
+	            // Update earnings
+	            Earnings earnings = earningsRepository.findById(parent.getId())
+	                    .orElse(new Earnings(parent));
+	            
+	            earnings.setTotalEarnings(earnings.getTotalEarnings() + REFERRAL_EARNING_AMOUNT);
+	            earningsRepository.save(earnings);
+	        }
+	    }
 
-        user.setReferral(userReferral);
-        userRepository.save(user);
+	    user.setPaymentSuccess(true);
+	    user.setIsActive(true);
 
-        return Optional.of(user);
+	    // Create and save referral
+	    Referral userReferral = new Referral();
+	    userReferral.setReferalCode(referralCode);
+	    userReferral.setUser(user);
+	    userReferral.setIsActive(true);
+	    referralRepository.save(userReferral);
+
+	    user.setReferral(userReferral);
+	    return Optional.of( userRepository.save(user));
+	 }
+	
+
+	@Override
+	public Optional<User> loginByEmailAndPassword(String userEmail, String userPassword) 
+	{
+	    Optional<User> userOpt = userRepository.findByEmail(userEmail);
+	    
+	    if (userOpt.isPresent()) 
+	    {
+	        User user = userOpt.get();
+	        
+	        if (user.getPassword().equals(userPassword)) 
+	        {
+	            return user.getIsActive() ? Optional.of(user) : Optional.empty();
+	        } 
+	        else  throw new RuntimeException("Incorrect password for email: " + userEmail);   
+	    } 
+	    else throw new RuntimeException("User does not exist with email: " + userEmail);
+   
     }
 
 }
