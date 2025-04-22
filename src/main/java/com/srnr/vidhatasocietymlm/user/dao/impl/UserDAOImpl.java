@@ -1,6 +1,5 @@
 package com.srnr.vidhatasocietymlm.user.dao.impl;
 
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -30,6 +29,7 @@ import jakarta.transaction.Transactional;
 @Component
 public class UserDAOImpl implements UserDAO {
 	private static final Logger logger = LoggerFactory.getLogger(UserDAOImpl.class);
+	@SuppressWarnings("unused")
 	private static final double REFERRAL_EARNING_AMOUNT = 750.0;
 	@Autowired
 	private UserRepository userRepository;
@@ -198,5 +198,19 @@ public class UserDAOImpl implements UserDAO {
 
         return Optional.of(user);
     }
+
+
+	@Override
+	public Optional<User> loginByEmailAndPassword(String userEmail, String userPassword) 
+	{
+	    Optional<User> user = userRepository.findByEmailAndPassword(userEmail, userPassword);
+
+	    if (user.isPresent()) 
+	    {
+	        return user;
+	    } 
+	    else throw new RuntimeException("Invalid credentials: email or password incorrect.");
+	}
+
 
 }
