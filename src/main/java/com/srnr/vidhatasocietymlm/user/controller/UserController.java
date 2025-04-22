@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.srnr.vidhatasocietymlm.model.User;
@@ -35,7 +36,7 @@ public class UserController {
 	private UserRepository userRepository;
 
 	@PostMapping(value = "/create", consumes = { MediaType.APPLICATION_JSON_VALUE }, 
-			                         produces = {MediaType.APPLICATION_JSON_VALUE })
+			produces = {MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<?> createUser(@Valid @RequestBody RegistrationRequestDTO registrationRequestDTO)
 	{
 		UserResponseDTO registerUser = this.userService.registerUser(registrationRequestDTO);
@@ -43,35 +44,25 @@ public class UserController {
 	}
 
 	@PostMapping(value = "/verifyEmail", consumes = { MediaType.APPLICATION_JSON_VALUE }, 
-			                              produces = {MediaType.APPLICATION_JSON_VALUE })
+			produces = {MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<?> verifyEmail(@Valid @RequestBody EmailRequestDTO emailRequestDTO)
 	{
 		return ResponseEntity.ok("Email Verification API is Working");
 	}
 
 	@PostMapping(value = "/VerifyOTP", consumes = { MediaType.APPLICATION_JSON_VALUE }, 
-			                            produces = {MediaType.APPLICATION_JSON_VALUE })
+			produces = {MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<?> verifyOTP(@Valid @RequestBody VerifyOTPRequestDTO verifyOTPRequestDTO) 
 	{
 		return ResponseEntity.ok("OTP Verification API is working");
 	}
 
-<<<<<<< Updated upstream
-=======
+
 	@PostMapping(value = "/UpdateUserAfterPayment")
 	public ResponseEntity<?> updateUserAfterPayment(@RequestParam String userId,@RequestParam boolean paymentSuccess )
 	{
 		String updateUserAfterPaymentSuccess = this.userService.updateUserAfterPaymentSuccess(userId, paymentSuccess);
 		return ResponseEntity.status(HttpStatus.OK).body(updateUserAfterPaymentSuccess);
 	}
-	
-	@GetMapping("/id")
-	public ResponseEntity<?> testUser(@RequestParam String id) {
-		
-		Optional<User> byId = userRepository.findById(id);
-		
-		return ResponseEntity.status(HttpStatus.OK).body(byId.get());
-	}
 
->>>>>>> Stashed changes
 }
