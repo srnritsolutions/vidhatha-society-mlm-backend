@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
+import com.srnr.vidhatasocietymlm.exception.customexceptions.InvalidEmailAndPasswordException;
 import com.srnr.vidhatasocietymlm.exception.customexceptions.InvalidReferralException;
 import com.srnr.vidhatasocietymlm.exception.customexceptions.UserAlreadyExistEmailException;
 import com.srnr.vidhatasocietymlm.exception.customexceptions.UserAlreadyExistPhoneNumberException;
@@ -34,6 +35,12 @@ public class GlobalExceptionHandler {
 
 	@ExceptionHandler(UserNotcreatedException.class)
 	public ResponseEntity<Message> userNotCreatedException(UserNotcreatedException e) 
+	{
+		return buildErrorResponse(e);
+	}
+	
+	@ExceptionHandler(InvalidEmailAndPasswordException.class)
+	public ResponseEntity<Message> invalidEmailAndPasswordException(InvalidEmailAndPasswordException e) 
 	{
 		return buildErrorResponse(e);
 	}
