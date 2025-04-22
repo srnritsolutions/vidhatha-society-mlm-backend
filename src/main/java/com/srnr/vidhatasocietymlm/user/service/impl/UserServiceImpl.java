@@ -6,7 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
+import com.srnr.vidhatasocietymlm.exception.GlobalExceptionHandler;
 import com.srnr.vidhatasocietymlm.exception.customexceptions.UserNotFoundException;
 import com.srnr.vidhatasocietymlm.exception.customexceptions.UserNotcreatedException;
 import com.srnr.vidhatasocietymlm.mapper.DTOToEntity;
@@ -24,10 +24,17 @@ import jakarta.persistence.PessimisticLockException;
 public class UserServiceImpl implements UserService
 {
 
+    private final GlobalExceptionHandler globalExceptionHandler;
+
 	private Logger logger=LoggerFactory.getLogger(UserServiceImpl.class);
 	
 	@Autowired
 	private UserDAO userDAO;
+
+
+    UserServiceImpl(GlobalExceptionHandler globalExceptionHandler) {
+        this.globalExceptionHandler = globalExceptionHandler;
+    }
 	
 	
 	@Override
@@ -83,6 +90,7 @@ public class UserServiceImpl implements UserService
 	@Override
 	public String updateUserAfterPaymentSuccess(String userId, boolean paymentSuccess) 
 	{
+		System.out.println(userId);
 		if(userId!=null &&  ! userId.isBlank())
 		{
 			Optional<User> updateUser = this.userDAO.updateUserAfterPaymentSuccess(userId, paymentSuccess);

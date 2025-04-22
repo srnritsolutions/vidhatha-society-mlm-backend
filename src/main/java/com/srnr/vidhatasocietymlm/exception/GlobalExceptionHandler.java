@@ -38,11 +38,11 @@ public class GlobalExceptionHandler {
 		return buildErrorResponse(e);
 	}
 
-	@ExceptionHandler(UserNotFoundException.class)
-	public ResponseEntity<Message> userNotFoundException(UserNotFoundException e) 
-	{
-		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Message(e.getMessage()));
-	}
+//	@ExceptionHandler(UserNotFoundException.class)
+//	public ResponseEntity<Message> userNotFoundException(UserNotFoundException e) 
+//	{
+//		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Message(e.getMessage()));
+//	}
 
 	@ExceptionHandler({ NoResourceFoundException.class,
 		                IllegalArgumentException.class })
