@@ -219,6 +219,7 @@ public class UserDAOImpl implements UserDAO {
 		  if(byUserEmail.isPresent())
 		  {
 			  User user = byUserEmail.get();
+			  
 			  if(user.getIsActive())
 			  {
 				  user.setPassword(newPassword);
