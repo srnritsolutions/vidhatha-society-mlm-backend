@@ -7,4 +7,5 @@ public interface UserService
 {
       UserResponseDTO registerUser(RegistrationRequestDTO registrationRequestDTO);
       String updateUserAfterPaymentSuccess(String userId,boolean paymentSuccess);
+      UserResponseDTO loginUserByEmailAndPassword(String email,String password);
 }

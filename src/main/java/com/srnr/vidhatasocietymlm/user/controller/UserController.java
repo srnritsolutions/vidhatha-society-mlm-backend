@@ -1,23 +1,18 @@
 package com.srnr.vidhatasocietymlm.user.controller;
 
-import java.util.Optional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.srnr.vidhatasocietymlm.model.User;
 import com.srnr.vidhatasocietymlm.repository.UserRepository;
 import com.srnr.vidhatasocietymlm.user.dto.EmailRequestDTO;
+import com.srnr.vidhatasocietymlm.user.dto.LoginRequestDTO;
 import com.srnr.vidhatasocietymlm.user.dto.RegistrationRequestDTO;
 import com.srnr.vidhatasocietymlm.user.dto.UserResponseDTO;
 import com.srnr.vidhatasocietymlm.user.dto.VerifyOTPRequestDTO;
@@ -31,7 +26,7 @@ public class UserController {
 
 	@Autowired
 	private UserService userService;
-	
+
 	@Autowired
 	private UserRepository userRepository;
 
@@ -65,4 +60,13 @@ public class UserController {
 		return ResponseEntity.status(HttpStatus.OK).body(updateUserAfterPaymentSuccess);
 	}
 
+	@PostMapping(
+		    value = "/login",
+		    consumes = MediaType.APPLICATION_JSON_VALUE,
+		    produces = MediaType.APPLICATION_JSON_VALUE
+		)
+		public ResponseEntity<String> userLoginByEmailAndPassword(@Valid @RequestBody LoginRequestDTO dto) {
+		    userService.loginUserByEmailAndPassword(dto.getEmail(), dto.getPassword());
+		    return ResponseEntity.ok("User Login Successfully");
+		}
 }
