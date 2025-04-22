@@ -24,23 +24,23 @@ import jakarta.persistence.PessimisticLockException;
 public class UserServiceImpl implements UserService
 {
 
-    private final GlobalExceptionHandler globalExceptionHandler;
+	private final GlobalExceptionHandler globalExceptionHandler;
 
 	private Logger logger=LoggerFactory.getLogger(UserServiceImpl.class);
-	
+
 	@Autowired
 	private UserDAO userDAO;
 
 
-    UserServiceImpl(GlobalExceptionHandler globalExceptionHandler) {
-        this.globalExceptionHandler = globalExceptionHandler;
-    }
-	
-	
+	UserServiceImpl(GlobalExceptionHandler globalExceptionHandler) {
+		this.globalExceptionHandler = globalExceptionHandler;
+	}
+
+
 	@Override
 	public UserResponseDTO registerUser(RegistrationRequestDTO registrationRequestDTO)
 	{
-		
+
 		try 
 		{
 			if(registrationRequestDTO==null)
@@ -48,16 +48,16 @@ public class UserServiceImpl implements UserService
 				logger.warn("RegistrationRequestDTO can't be null");
 				throw new RuntimeException("RegistrationRequestDTO can't be null");
 			}
-			
+
 			User user = DTOToEntity.userRequestDTOToUserEntity(registrationRequestDTO);
 			if(user==null)
 			{
 				logger.warn("Something went wrong ,while Converting RequestDTO to User Entity");
 				throw new RuntimeException("Something went wrong ,while Converting RequestDTO to User Entity");
 			}
-			
+
 			Optional<User> saveUser = userDAO.saveUser(user, registrationRequestDTO.getReferralCode());
-			
+
 			if(saveUser.isPresent())
 			{
 				UserResponseDTO userResponseDTO = EntityToDTO.UserEntityToUserRequestDTO(saveUser.get());
@@ -76,14 +76,14 @@ public class UserServiceImpl implements UserService
 				logger.warn("User Not Registed !");
 				throw new UserNotcreatedException("User Not Registed !");
 			}
-			
+
 		} 
 		catch (PessimisticLockException e)
 		{
 			logger.warn("Someone is already using this referral code. Please try again some time");
 			throw new RuntimeException("Someone is already using this referral code. Please try again some time");
 		}
-	    
+
 	}
 
 
@@ -108,7 +108,32 @@ public class UserServiceImpl implements UserService
 			throw new RuntimeException("user id can't be null or blank");
 		}
 	}
-	
-	
+
+
+
+	@Override
+	public String loginUserByEmailAndPassword(String email,String password)
+	{
+		if((email!=null &&  ! email.isBlank()) && (password!=null && ! password.isBlank()))
+		{
+			if(email.matches("^[a-zA-Z][A-Za-z0-9._%+-]+@gmail\\.com$"))
+			{
+				if(password.length()>=6)
+				{
+					Optional<User> userFetchedByEmailAndPassword = this.userDAO.loginByEmailAndPassword(email,password);
+					if(userFetchedByEmailAndPassword.isPresent())
+					{
+						return "login Succesfull";
+					}
+					else throw new RuntimeException("User is not active");
+				}
+				else throw new IllegalArgumentException("Password Must be at least 6 characters");
+			}
+			else throw new IllegalArgumentException("Invalid Email Format");
+		}
+		else throw new IllegalArgumentException("Email and Password must not be null or blank");
+	}
+
+
 
 }
