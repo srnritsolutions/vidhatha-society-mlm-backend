@@ -128,6 +128,7 @@ public class UserDAOImpl implements UserDAO {
 	@Transactional
 	public Optional<User> updateUserAfterPaymentSuccess(String userId, boolean paymentSuccess) 
 	{
+	
         if (!paymentSuccess) 
         {
             logger.warn("User update is not possible due to unsuccessful payment for userId: {}", userId);
@@ -139,12 +140,18 @@ public class UserDAOImpl implements UserDAO {
             throw new IllegalArgumentException("User ID cannot be null or blank");
         }
 
-        Optional<User> optionalUser = this.userRepository.findById(userId);
-        if (optionalUser.isEmpty()) {
-            throw new RuntimeException("User not found with ID: " + userId);
+       // Optional<User> optionalUser = this.userRepository.findById(userId);
+        //User user = this.userRepository.getReferenceById(userId);
+        User user = this.userRepository.getById(userId);
+        /*if (optionalUser.isEmpty()) {
+            throw new UserNotFoundException("User not found with ID: " + userId);
+        }*/
+        if(user == null) {
+        	throw new UserNotFoundException("User not found with ID: " + userId);
         }
+        System.out.println("USer Name:"+user.getName());
 
-        User user = optionalUser.get();
+        //User user = optionalUser.get();
         User parent = user.getParent();
         String referralCode = UUID.randomUUID().toString().replace("-", "").substring(0, 5);
 
@@ -175,8 +182,11 @@ public class UserDAOImpl implements UserDAO {
         user.setPaymentSuccess(true);
         user.setIsActive(true);
 
+        
+        Referral userReferral = user.getReferral();
+        
         // Create and save referral
-        Referral userReferral = new Referral();
+       // Referral userReferral = new Referral();
         userReferral.setReferalCode(referralCode);
         userReferral.setUser(user);
         userReferral.setIsActive(true);

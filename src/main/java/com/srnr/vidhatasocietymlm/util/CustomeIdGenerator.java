@@ -9,6 +9,6 @@ public class CustomeIdGenerator
 	{
 		long timeStamp = Instant.now().toEpochMilli();
 		int randomPart = ThreadLocalRandom.current().nextInt(100000000, 999999999);
-	    return timeStamp+" "+randomPart;	
+	    return timeStamp+""+randomPart;	
 	}
 }
