@@ -112,7 +112,8 @@ public class UserServiceImpl implements UserService
 
 
 	@Override
-	public UserResponseDTO loginUserByEmailAndPassword(String email,String password) {
+	public String loginUserByEmailAndPassword(String email,String password)
+	{
 		if((email!=null &&  ! email.isBlank()) && (password!=null && ! password.isBlank()))
 		{
 			if(email.matches("^[a-zA-Z][A-Za-z0-9._%+-]+@gmail\\.com$"))
@@ -122,9 +123,7 @@ public class UserServiceImpl implements UserService
 					Optional<User> userFetchedByEmailAndPassword = this.userDAO.loginByEmailAndPassword(email,password);
 					if(userFetchedByEmailAndPassword.isPresent())
 					{
-						UserResponseDTO userResponseDTO = EntityToDTO.UserEntityToUserRequestDTO(userFetchedByEmailAndPassword.get());
-						return userResponseDTO;
-
+						return "login Succesfull";
 					}
 					else throw new RuntimeException("User is not active");
 				}
