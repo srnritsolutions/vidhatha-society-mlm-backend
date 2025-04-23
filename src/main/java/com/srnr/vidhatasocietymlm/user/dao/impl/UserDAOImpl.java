@@ -213,21 +213,24 @@ public class UserDAOImpl implements UserDAO {
 		else throw new InvalidEmailAndPasswordException("Invalid credentials: email or password incorrect.");
 	}
 
+
+
 	@Override
-	public Optional<User> updatePassword(String userEmail, String newPassword) 
-	{
+	public Optional<User> updatePassword(String userEmail, String newPassword) {
 		Optional<User> byUserEmail = userRepository.findByEmail(userEmail);
-		  if(byUserEmail.isPresent())
-		  {
-			  User user = byUserEmail.get();
-			  if(user.getIsActive())
-			  {
-				  user.setPassword(newPassword);
-				  User updatePassword = userRepository.save(user);
-				  return updatePassword!=null?Optional.of(updatePassword):Optional.empty();
-			  }
-			  else throw new RuntimeException("User is not active.");  
-		  }
-		  else throw new RuntimeException("User not exist with email : "+userEmail);
+		if(byUserEmail.isPresent())
+		{
+			User user = byUserEmail.get();
+
+			if(user.getIsActive())
+			{
+				user.setPassword(newPassword);
+				User updatePassword = userRepository.save(user);
+				return updatePassword!=null?Optional.of(updatePassword):Optional.empty();
+			}
+			else throw new RuntimeException("User is not active.");  
+		}
+		else throw new RuntimeException("User not exist with email : "+userEmail);
 	}
+
 }
