@@ -8,6 +8,8 @@ public interface UserDAO
 {
 	Optional<User> saveUser(User user,String referralCode);
 	Optional<User> updateUserAfterPaymentSuccess(String userId, boolean paymentSuccess);
+	Optional<User> findByUserEmail(String userEmail);
+	Optional<User> findByUserPhoneNumber(Long userPhoneNumber);
 	Optional<User> loginByEmailAndPassword(String userEmail, String userPassword);
 	Optional<User> updatePassword(String userEmail, String newPassword);
 }
