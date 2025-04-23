@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.srnr.vidhatasocietymlm.exception.GlobalExceptionHandler;
+import com.srnr.vidhatasocietymlm.exception.customexceptions.InvalideOTPException;
 import com.srnr.vidhatasocietymlm.exception.customexceptions.UserNotFoundException;
 import com.srnr.vidhatasocietymlm.exception.customexceptions.UserNotcreatedException;
 import com.srnr.vidhatasocietymlm.mapper.DTOToEntity;
@@ -20,6 +21,7 @@ import com.srnr.vidhatasocietymlm.user.dto.RegistrationRequestDTO;
 import com.srnr.vidhatasocietymlm.user.dto.UserResponseDTO;
 import com.srnr.vidhatasocietymlm.user.dto.VerifyOTPRequestDTO;
 import com.srnr.vidhatasocietymlm.user.service.UserService;
+import com.srnr.vidhatasocietymlm.util.EmailSender;
 import com.srnr.vidhatasocietymlm.util.Message;
 import com.srnr.vidhatasocietymlm.util.OTPOperation;
 
@@ -144,7 +146,7 @@ public class UserServiceImpl implements UserService
 	@Override
 	public Message verifyUserByEmail(EmailRequestDTO emailRequestDTO)
 	{
-		
+
 		if(emailRequestDTO!=null)
 		{
 			Optional<User> optionalUser = this.userDAO.findByUserEmail(emailRequestDTO.getEmail());
@@ -152,15 +154,15 @@ public class UserServiceImpl implements UserService
 			if(optionalUser.isPresent())
 			{
 				System.out.println("inside if");
-			   	String otp = this.otpOperation.getOTP();
-			   	System.out.println(otp);
-			   	boolean otpIsSendedToEmail = EmailSender.sendOTPToEmail(emailRequestDTO.getEmail(), otp);
-			   	if(otpIsSendedToEmail)
-			   	{
-			   		this.otpOperation.storeOTP(emailRequestDTO.getEmail(), otp);
-			   		return new  Message("OTP Sended Successfully.");
-			   	}
-			   	else throw new RuntimeException("something went wrong! try again after some time.");
+				String otp = this.otpOperation.getOTP();
+				System.out.println(otp);
+				boolean otpIsSendedToEmail = EmailSender.sendOTPToEmail(emailRequestDTO.getEmail(), otp);
+				if(otpIsSendedToEmail)
+				{
+					this.otpOperation.storeOTP(emailRequestDTO.getEmail(), otp);
+					return new  Message("OTP Sended Successfully.");
+				}
+				else throw new RuntimeException("something went wrong! try again after some time.");
 			}
 			else throw new RuntimeException("something went wrong! try again after some time.");	
 		}
@@ -175,10 +177,10 @@ public class UserServiceImpl implements UserService
 			Optional<User> optionalUser = this.userDAO.findByUserEmail(verifyOTPRequestDTO.getEmail());
 			if(optionalUser.isPresent())
 			{
-			   Optional<String> validateOTP = this.otpOperation.validateOTP(verifyOTPRequestDTO.getEmail(), verifyOTPRequestDTO.getOtp());
-			   if(validateOTP.isPresent())
-			         return new Message(validateOTP.get());
-			   else throw new InvalideOTPException("Invalid OTP!");
+				Optional<String> validateOTP = this.otpOperation.validateOTP(verifyOTPRequestDTO.getEmail(), verifyOTPRequestDTO.getOtp());
+				if(validateOTP.isPresent())
+					return new Message(validateOTP.get());
+				else throw new InvalideOTPException("Invalid OTP!");
 			}
 			else throw new RuntimeException("something went wrong! try again after some time.");
 		}
@@ -186,14 +188,10 @@ public class UserServiceImpl implements UserService
 	} 
 	
 	
-	
-	
-	
-	
 	@Override
 	public String updatePassword(ChangePasswordRequestDTO changePasswordRequestDTO) 
 	{
-		
+
 		if(changePasswordRequestDTO!=null)
 		{
 			if(changePasswordRequestDTO.getEmail()!=null && !changePasswordRequestDTO.getEmail().isBlank())
@@ -207,7 +205,7 @@ public class UserServiceImpl implements UserService
 							Optional<User> optionalUser = this.userDAO.updatePassword(changePasswordRequestDTO.getEmail(),changePasswordRequestDTO.getNewPassword());
 							if(optionalUser.isPresent())
 							{						
-								     return "Password changed successfully";								
+								return "Password changed successfully";								
 							}
 							else throw new UserNotFoundException("User password not updated !");
 						}
