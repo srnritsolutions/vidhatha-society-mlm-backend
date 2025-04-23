@@ -1,5 +1,8 @@
 package com.srnr.vidhatasocietymlm.user.dao.impl;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -18,9 +21,11 @@ import com.srnr.vidhatasocietymlm.exception.customexceptions.UserAlreadyExistEma
 import com.srnr.vidhatasocietymlm.exception.customexceptions.UserAlreadyExistPhoneNumberException;
 import com.srnr.vidhatasocietymlm.exception.customexceptions.UserNotFoundException;
 import com.srnr.vidhatasocietymlm.model.Earnings;
+import com.srnr.vidhatasocietymlm.model.Level;
 import com.srnr.vidhatasocietymlm.model.Referral;
 import com.srnr.vidhatasocietymlm.model.User;
 import com.srnr.vidhatasocietymlm.repository.EarningsRepository;
+import com.srnr.vidhatasocietymlm.repository.LevelRepository;
 import com.srnr.vidhatasocietymlm.repository.ReferralRepository;
 import com.srnr.vidhatasocietymlm.repository.UserRepository;
 import com.srnr.vidhatasocietymlm.user.dao.UserDAO;
@@ -29,6 +34,8 @@ import jakarta.transaction.Transactional;
 
 @Component
 public class UserDAOImpl implements UserDAO {
+
+    private final LevelRepository levelRepository;
 	private static final Logger logger = LoggerFactory.getLogger(UserDAOImpl.class);
 	@SuppressWarnings("unused")
 	private static final double REFERRAL_EARNING_AMOUNT = 750.0;
@@ -40,6 +47,12 @@ public class UserDAOImpl implements UserDAO {
 
 	@Autowired
 	private EarningsRepository earningsRepository;
+	
+ 
+
+    UserDAOImpl(LevelRepository levelRepository) {
+        this.levelRepository = levelRepository;
+    }
 
 	@Transactional
 	@Retryable(retryFor = {
@@ -90,7 +103,17 @@ public class UserDAOImpl implements UserDAO {
 						return new InvalidReferralException("Invalid referral code : "+referralCode);
 					}
 							);
+			
+			//parentReferral.setUsedTimes(parentReferral.getUser().getParent().getChildren().size());
+			User getUser = parentReferral.getUser();
+			if (getUser != null && getUser.getChildren() != null) {
+			    parentReferral.setUsedTimes(getUser.getChildren().size()+1);
+			}
+			
+			this.referralRepository.save(parentReferral);
+			
 			User parentUser = parentReferral.getUser();
+			
 			// lock parentUser record
 			parentUser = userRepository.lockByUserId(parentUser.getId())
 					.orElseThrow(() -> {
@@ -172,13 +195,15 @@ public class UserDAOImpl implements UserDAO {
 					referralRepository.save(referral);
 				}
 
+				
 				// Update earnings
-				Earnings earnings = earningsRepository.findById(parent.getId())
-						.orElse(new Earnings(parent));
-				double earningsAmount = 250.0; // Example earnings calculation
-				earnings.setTotalEarnings(earnings.getTotalEarnings() + earningsAmount);
-				earningsRepository.save(earnings);
+//				Earnings earnings = earningsRepository.findById(parent.getId())
+//						.orElse(new Earnings(parent));
+//				double earningsAmount = 250.0; // Example earnings calculation
+//				earnings.setTotalEarnings(earnings.getTotalEarnings() + earningsAmount);
+//				earningsRepository.save(earnings);
 			}
+			
 		}
 
 		user.setPaymentSuccess(true);
@@ -192,15 +217,23 @@ public class UserDAOImpl implements UserDAO {
 		userReferral.setReferalCode(referralCode);
 		userReferral.setUser(user);
 		userReferral.setIsActive(true);
+		userReferral.setCreatedAt(LocalDateTime.now());
 		referralRepository.save(userReferral);
 
+		
+		Optional<Level> byLevelNum = this.levelRepository.findByLevelNum(user.getUserLevel());
+		user.setReward(byLevelNum.get().getRewards());
+		
 		user.setReferral(userReferral);
 		userRepository.save(user);
+		
 
 		return Optional.of(user);
 	}
 
-
+	
+	
+	
 	@Override
 	public Optional<User> loginByEmailAndPassword(String userEmail, String userPassword) 
 	{
