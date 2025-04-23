@@ -212,7 +212,8 @@ public class UserDAOImpl implements UserDAO {
 	}
 	
 	@Override
-	public Optional<User> findByUserEmail(String userEmail) {
+	public Optional<User> findByUserEmail(String userEmail) 
+	{
 		if(userEmail!=null && !userEmail.isBlank())
 		{
 			Optional<User> byEmail = userRepository.findByEmail(userEmail);
@@ -233,8 +234,8 @@ public class UserDAOImpl implements UserDAO {
 	@Override
 	public Optional<User> findByUserPhoneNumber(Long userPhoneNumber) 
 	{
-		User byUserPhone = userRepository.findByUserPhone(userPhoneNumber);
-		return byUserPhone!=null?Optional.of(byUserPhone):Optional.empty();
+		User byPhoneNumber = userRepository.findByPhoneNumber(userPhoneNumber);
+		return byPhoneNumber!=null?Optional.of(byPhoneNumber):Optional.empty();
 	}
 
 	@Override
