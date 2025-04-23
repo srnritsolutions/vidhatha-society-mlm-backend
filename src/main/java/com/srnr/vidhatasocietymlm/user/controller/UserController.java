@@ -17,6 +17,7 @@ import com.srnr.vidhatasocietymlm.user.dto.RegistrationRequestDTO;
 import com.srnr.vidhatasocietymlm.user.dto.UserResponseDTO;
 import com.srnr.vidhatasocietymlm.user.dto.VerifyOTPRequestDTO;
 import com.srnr.vidhatasocietymlm.user.service.UserService;
+import com.srnr.vidhatasocietymlm.util.Message;
 
 import jakarta.validation.Valid;
 
@@ -57,7 +58,7 @@ public class UserController {
 	public ResponseEntity<?> updateUserAfterPayment(@RequestParam String userId,@RequestParam boolean paymentSuccess )
 	{
 		String updateUserAfterPaymentSuccess = this.userService.updateUserAfterPaymentSuccess(userId, paymentSuccess);
-		return ResponseEntity.status(HttpStatus.OK).body(updateUserAfterPaymentSuccess);
+		return ResponseEntity.status(HttpStatus.OK).body(new Message(updateUserAfterPaymentSuccess));
 	}
 
 	@PostMapping(
@@ -65,8 +66,9 @@ public class UserController {
 		    consumes = MediaType.APPLICATION_JSON_VALUE,
 		    produces = MediaType.APPLICATION_JSON_VALUE
 		)
-		public ResponseEntity<String> userLoginByEmailAndPassword(@Valid @RequestBody LoginRequestDTO dto) {
-		    userService.loginUserByEmailAndPassword(dto.getEmail(), dto.getPassword());
-		    return ResponseEntity.ok("User Login Successfully");
+		public ResponseEntity<?> userLoginByEmailAndPassword(@Valid @RequestBody LoginRequestDTO dto) {
+		     String loginUserByEmailAndPassword = userService.loginUserByEmailAndPassword(dto.getEmail(), dto.getPassword());
+		    return ResponseEntity.status(HttpStatus.OK).body(new Message(loginUserByEmailAndPassword));
 		}
+
 }
