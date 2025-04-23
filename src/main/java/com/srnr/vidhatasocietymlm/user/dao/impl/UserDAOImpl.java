@@ -234,8 +234,14 @@ public class UserDAOImpl implements UserDAO {
 	@Override
 	public Optional<User> findByUserPhoneNumber(Long userPhoneNumber) 
 	{
-		User byPhoneNumber = userRepository.findByPhoneNumber(userPhoneNumber);
-		return byPhoneNumber!=null?Optional.of(byPhoneNumber):Optional.empty();
+		Optional<User> byPhoneNumber = userRepository.findByPhoneNumber(userPhoneNumber);
+		if(byPhoneNumber.isPresent())
+		{
+			return byPhoneNumber;
+		}
+		else {
+			return Optional.empty();
+		}
 	}
 
 
