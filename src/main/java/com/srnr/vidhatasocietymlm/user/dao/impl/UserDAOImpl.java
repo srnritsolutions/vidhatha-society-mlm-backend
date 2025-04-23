@@ -277,9 +277,10 @@ public class UserDAOImpl implements UserDAO {
 		}
 	}
 
+
+
 	@Override
-	public Optional<User> updatePassword(String userEmail, String newPassword) 
-	{
+	public Optional<User> updatePassword(String userEmail, String newPassword) {
 		Optional<User> byUserEmail = userRepository.findByEmail(userEmail);
 		  if(byUserEmail.isPresent())
 		  {
@@ -295,8 +296,4 @@ public class UserDAOImpl implements UserDAO {
 		  }
 		  else throw new RuntimeException("User not exist with email : "+userEmail);
 	}
-
-
-
-	
 }

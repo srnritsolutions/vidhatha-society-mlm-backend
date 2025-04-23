@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.srnr.vidhatasocietymlm.repository.UserRepository;
+import com.srnr.vidhatasocietymlm.user.dto.ChangePasswordRequestDTO;
 import com.srnr.vidhatasocietymlm.user.dto.EmailRequestDTO;
 import com.srnr.vidhatasocietymlm.user.dto.LoginRequestDTO;
 import com.srnr.vidhatasocietymlm.user.dto.RegistrationRequestDTO;
@@ -43,14 +44,16 @@ public class UserController {
 			produces = {MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<?> verifyEmail(@Valid @RequestBody EmailRequestDTO emailRequestDTO)
 	{
-		return ResponseEntity.ok("Email Verification API is Working");
+		Message verifyUserByEmail = this.userService.verifyUserByEmail(emailRequestDTO);
+		return new ResponseEntity<Message>(verifyUserByEmail,HttpStatus.OK);
 	}
 
 	@PostMapping(value = "/VerifyOTP", consumes = { MediaType.APPLICATION_JSON_VALUE }, 
 			produces = {MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<?> verifyOTP(@Valid @RequestBody VerifyOTPRequestDTO verifyOTPRequestDTO) 
 	{
-		return ResponseEntity.ok("OTP Verification API is working");
+		 Message verifyOTP = this.userService.verifyOTP(verifyOTPRequestDTO);
+		return new ResponseEntity<Message>(verifyOTP,HttpStatus.OK);
 	}
 
 
@@ -62,13 +65,24 @@ public class UserController {
 	}
 
 	@PostMapping(
-		    value = "/login",
-		    consumes = MediaType.APPLICATION_JSON_VALUE,
-		    produces = MediaType.APPLICATION_JSON_VALUE
-		)
-		public ResponseEntity<?> userLoginByEmailAndPassword(@Valid @RequestBody LoginRequestDTO dto) {
-		     String loginUserByEmailAndPassword = userService.loginUserByEmailAndPassword(dto.getEmail(), dto.getPassword());
-		    return ResponseEntity.status(HttpStatus.OK).body(new Message(loginUserByEmailAndPassword));
-		}
+			value = "/login",
+			consumes = MediaType.APPLICATION_JSON_VALUE,
+			produces = MediaType.APPLICATION_JSON_VALUE
+			)
+	public ResponseEntity<?> userLoginByEmailAndPassword(@Valid @RequestBody LoginRequestDTO dto) {
+		String loginUserByEmailAndPassword = userService.loginUserByEmailAndPassword(dto.getEmail(), dto.getPassword());
+		return ResponseEntity.status(HttpStatus.OK).body(new Message(loginUserByEmailAndPassword));
+	}
+
+
+	@PostMapping(value="/UpdatePassword", 
+			consumes = { MediaType.APPLICATION_JSON_VALUE},
+			produces = { MediaType.APPLICATION_JSON_VALUE }
+			)
+	public ResponseEntity<?> updatePassword(@Valid @RequestBody ChangePasswordRequestDTO changePasswordRequestDTO) 
+	{
+		String updatePassword = userService.updatePassword(changePasswordRequestDTO);
+		return ResponseEntity.status(HttpStatus.OK).body(new Message(updatePassword));
+	}
 
 }

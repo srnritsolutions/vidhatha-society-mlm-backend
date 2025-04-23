@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.srnr.vidhatasocietymlm.exception.GlobalExceptionHandler;
+import com.srnr.vidhatasocietymlm.exception.customexceptions.InvalideOTPException;
 import com.srnr.vidhatasocietymlm.exception.customexceptions.UserNotFoundException;
 import com.srnr.vidhatasocietymlm.exception.customexceptions.UserNotcreatedException;
 import com.srnr.vidhatasocietymlm.mapper.DTOToEntity;
@@ -14,9 +15,15 @@ import com.srnr.vidhatasocietymlm.mapper.EntityToDTO;
 import com.srnr.vidhatasocietymlm.model.User;
 
 import com.srnr.vidhatasocietymlm.user.dao.UserDAO;
+import com.srnr.vidhatasocietymlm.user.dto.ChangePasswordRequestDTO;
+import com.srnr.vidhatasocietymlm.user.dto.EmailRequestDTO;
 import com.srnr.vidhatasocietymlm.user.dto.RegistrationRequestDTO;
 import com.srnr.vidhatasocietymlm.user.dto.UserResponseDTO;
+import com.srnr.vidhatasocietymlm.user.dto.VerifyOTPRequestDTO;
 import com.srnr.vidhatasocietymlm.user.service.UserService;
+import com.srnr.vidhatasocietymlm.util.EmailSender;
+import com.srnr.vidhatasocietymlm.util.Message;
+import com.srnr.vidhatasocietymlm.util.OTPOperation;
 
 import jakarta.persistence.PessimisticLockException;
 
@@ -31,6 +38,8 @@ public class UserServiceImpl implements UserService
 	@Autowired
 	private UserDAO userDAO;
 
+	@Autowired
+	private OTPOperation otpOperation;
 
 	UserServiceImpl(GlobalExceptionHandler globalExceptionHandler) {
 		this.globalExceptionHandler = globalExceptionHandler;
@@ -134,6 +143,80 @@ public class UserServiceImpl implements UserService
 		else throw new IllegalArgumentException("Email and Password must not be null or blank");
 	}
 
+	@Override
+	public Message verifyUserByEmail(EmailRequestDTO emailRequestDTO)
+	{
 
+		if(emailRequestDTO!=null)
+		{
+			Optional<User> optionalUser = this.userDAO.findByUserEmail(emailRequestDTO.getEmail());
+			System.out.println(optionalUser.get()+emailRequestDTO.getEmail());
+			if(optionalUser.isPresent())
+			{
+				System.out.println("inside if");
+				String otp = this.otpOperation.getOTP();
+				System.out.println(otp);
+				boolean otpIsSendedToEmail = EmailSender.sendOTPToEmail(emailRequestDTO.getEmail(), otp);
+				if(otpIsSendedToEmail)
+				{
+					this.otpOperation.storeOTP(emailRequestDTO.getEmail(), otp);
+					return new  Message("OTP Sended Successfully.");
+				}
+				else throw new RuntimeException("something went wrong! try again after some time.");
+			}
+			else throw new RuntimeException("something went wrong! try again after some time.");	
+		}
+		else throw new RuntimeException("Email can't be null");
+	}
 
+	@Override
+	public Message verifyOTP(VerifyOTPRequestDTO verifyOTPRequestDTO)
+	{
+		if(verifyOTPRequestDTO!=null)
+		{		
+			Optional<User> optionalUser = this.userDAO.findByUserEmail(verifyOTPRequestDTO.getEmail());
+			if(optionalUser.isPresent())
+			{
+				Optional<String> validateOTP = this.otpOperation.validateOTP(verifyOTPRequestDTO.getEmail(), verifyOTPRequestDTO.getOtp());
+				if(validateOTP.isPresent())
+					return new Message(validateOTP.get());
+				else throw new InvalideOTPException("Invalid OTP!");
+			}
+			else throw new RuntimeException("something went wrong! try again after some time.");
+		}
+		else throw new RuntimeException("something went wrong! try again after some time.");
+	} 
+	
+	
+	@Override
+	public String updatePassword(ChangePasswordRequestDTO changePasswordRequestDTO) 
+	{
+
+		if(changePasswordRequestDTO!=null)
+		{
+			if(changePasswordRequestDTO.getEmail()!=null && !changePasswordRequestDTO.getEmail().isBlank())
+			{
+				if(changePasswordRequestDTO.getNewPassword()!=null && ! changePasswordRequestDTO.getNewPassword().isBlank())
+				{
+					if(changePasswordRequestDTO.getConfirmPassword()!=null && ! changePasswordRequestDTO.getConfirmPassword().isBlank())
+					{
+						if(changePasswordRequestDTO.getNewPassword().equals(changePasswordRequestDTO.getConfirmPassword()))
+						{
+							Optional<User> optionalUser = this.userDAO.updatePassword(changePasswordRequestDTO.getEmail(),changePasswordRequestDTO.getNewPassword());
+							if(optionalUser.isPresent())
+							{						
+								return "Password changed successfully";								
+							}
+							else throw new UserNotFoundException("User password not updated !");
+						}
+						else throw new RuntimeException("New Password and Confirm Password Should be Same.");
+					}
+					else throw new RuntimeException("confirm password can't be null or blank");
+				}
+				else throw new RuntimeException("New Password must not be null and blank");
+			}
+			else throw new RuntimeException("User Email can't be null or blank");
+		}
+		else throw new RuntimeException("Password Credential Can't be null");		
+	}
 }

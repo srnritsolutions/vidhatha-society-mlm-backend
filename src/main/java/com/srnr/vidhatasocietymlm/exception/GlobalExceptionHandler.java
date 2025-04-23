@@ -13,6 +13,7 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import com.srnr.vidhatasocietymlm.exception.customexceptions.InvalidEmailAndPasswordException;
 import com.srnr.vidhatasocietymlm.exception.customexceptions.InvalidReferralException;
+import com.srnr.vidhatasocietymlm.exception.customexceptions.InvalideOTPException;
 import com.srnr.vidhatasocietymlm.exception.customexceptions.UserAlreadyExistEmailException;
 import com.srnr.vidhatasocietymlm.exception.customexceptions.UserAlreadyExistPhoneNumberException;
 import com.srnr.vidhatasocietymlm.exception.customexceptions.UserNotFoundException;
@@ -44,7 +45,12 @@ public class GlobalExceptionHandler {
 	{
 		return buildErrorResponse(e);
 	}
-
+	@ExceptionHandler(InvalideOTPException.class)
+	public ResponseEntity<Message> invalideOTPException(InvalideOTPException e) 
+	{
+		return buildErrorResponse(e);
+	}
+	
 //	@ExceptionHandler(UserNotFoundException.class)
 //	public ResponseEntity<Message> userNotFoundException(UserNotFoundException e) 
 //	{
