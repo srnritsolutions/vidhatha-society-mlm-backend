@@ -16,9 +16,6 @@ import jakarta.persistence.LockModeType;
 @Repository
 public interface UserRepository extends JpaRepository<User, String>
 {
-	
-	//Optional<User> findById(String id);
-	//User getReferenceById(String id);
 	User getById(String id);
 	
 	Optional<User> findByEmail(String email);
@@ -30,6 +27,7 @@ public interface UserRepository extends JpaRepository<User, String>
 	@Query("select u from User u where u.id=:id")
 	Optional<User> lockByUserId(@Param("id") String id);
 	Optional<User> findByEmailAndPassword(String email, String password);
+	User findByUserPhone(Long userPhoneNumber);
 
 	
 }

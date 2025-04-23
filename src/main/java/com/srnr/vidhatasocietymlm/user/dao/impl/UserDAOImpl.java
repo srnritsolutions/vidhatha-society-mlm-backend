@@ -10,7 +10,6 @@ import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
-
 import com.srnr.vidhatasocietymlm.appconstants.Role;
 import com.srnr.vidhatasocietymlm.exception.customexceptions.InvalidEmailAndPasswordException;
 import com.srnr.vidhatasocietymlm.exception.customexceptions.InvalidReferralException;
@@ -24,7 +23,6 @@ import com.srnr.vidhatasocietymlm.repository.EarningsRepository;
 import com.srnr.vidhatasocietymlm.repository.ReferralRepository;
 import com.srnr.vidhatasocietymlm.repository.UserRepository;
 import com.srnr.vidhatasocietymlm.user.dao.UserDAO;
-
 import jakarta.transaction.Transactional;
 
 @Component
@@ -212,6 +210,32 @@ public class UserDAOImpl implements UserDAO {
 		} 
 		else throw new InvalidEmailAndPasswordException("Invalid credentials: email or password incorrect.");
 	}
+	
+	@Override
+	public Optional<User> findByUserEmail(String userEmail) {
+		if(userEmail!=null && !userEmail.isBlank())
+		{
+			Optional<User> byEmail = userRepository.findByEmail(userEmail);
+			if(byEmail!=null)
+			{
+				User user = byEmail.get();
+				if(user.getIsActive())
+				{
+					return Optional.of(user);
+				}
+				else throw new RuntimeException("User is not active.");  
+			}
+			else throw new UserNotFoundException("user not exist with email : "+userEmail);
+		}
+		else throw new RuntimeException("user Email must not be null or blank!.");	
+	}
+
+	@Override
+	public Optional<User> findByUserPhoneNumber(Long userPhoneNumber) 
+	{
+		User byUserPhone = userRepository.findByUserPhone(userPhoneNumber);
+		return byUserPhone!=null?Optional.of(byUserPhone):Optional.empty();
+	}
 
 	@Override
 	public Optional<User> updatePassword(String userEmail, String newPassword) 
@@ -220,6 +244,7 @@ public class UserDAOImpl implements UserDAO {
 		  if(byUserEmail.isPresent())
 		  {
 			  User user = byUserEmail.get();
+			  
 			  if(user.getIsActive())
 			  {
 				  user.setPassword(newPassword);
@@ -230,4 +255,8 @@ public class UserDAOImpl implements UserDAO {
 		  }
 		  else throw new RuntimeException("User not exist with email : "+userEmail);
 	}
+
+
+
+	
 }
