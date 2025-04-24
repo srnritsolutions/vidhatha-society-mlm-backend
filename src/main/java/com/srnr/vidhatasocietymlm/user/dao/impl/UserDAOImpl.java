@@ -306,7 +306,7 @@ public class UserDAOImpl implements UserDAO
 	public Optional<User> findByUserId(String id)
 	{
 		Optional<User> byId = userRepository.findById(id);
-		if(byId!=null && !byId.isEmpty())
+		if(byId.isPresent())
 		{
 			User user = byId.get();
 			if(user.getIsActive())
@@ -315,7 +315,7 @@ public class UserDAOImpl implements UserDAO
 			}
 			else throw new RuntimeException("user is not active.");
 		}
-		else throw new RuntimeException("user id can not null or empty.");
+		else throw new UserNotFoundException("user not found with userId : "+id);
 	}
 
 }
