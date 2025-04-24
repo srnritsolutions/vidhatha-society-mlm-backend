@@ -14,12 +14,15 @@ import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
+
+import com.srnr.vidhatasocietymlm.VidhataSocietyMlmBackendApplication;
+
 import org.springframework.web.multipart.MultipartFile;
+
 import com.srnr.vidhatasocietymlm.appconstants.Role;
 import com.srnr.vidhatasocietymlm.exception.customexceptions.InvalidEmailAndPasswordException;
 import com.srnr.vidhatasocietymlm.exception.customexceptions.InvalidReferralException;
-import com.srnr.vidhatasocietymlm.exception.customexceptions.UserAlreadyExistEmailException;
-import com.srnr.vidhatasocietymlm.exception.customexceptions.UserAlreadyExistPhoneNumberException;
+import com.srnr.vidhatasocietymlm.exception.customexceptions.UserAlreadyExistException;
 import com.srnr.vidhatasocietymlm.exception.customexceptions.UserNotFoundException;
 import com.srnr.vidhatasocietymlm.model.Earnings;
 import com.srnr.vidhatasocietymlm.model.Level;
@@ -30,14 +33,22 @@ import com.srnr.vidhatasocietymlm.repository.LevelRepository;
 import com.srnr.vidhatasocietymlm.repository.ReferralRepository;
 import com.srnr.vidhatasocietymlm.repository.UserRepository;
 import com.srnr.vidhatasocietymlm.user.dao.UserDAO;
+import com.srnr.vidhatasocietymlm.util.OTPOperation;
 import com.srnr.vidhatasocietymlm.util.FileStorageProperties;
 import com.srnr.vidhatasocietymlm.util.ImageFileNameGenerator;
+
 
 import jakarta.transaction.Transactional;
 
 @Component
-public class UserDAOImpl implements UserDAO 
-{
+public class UserDAOImpl implements UserDAO {
+
+    private final VidhataSocietyMlmBackendApplication vidhataSocietyMlmBackendApplication;
+
+    private final OTPOperation OTPOperation;
+
+    private final LevelRepository levelRepository;
+
 	private static final Logger logger = LoggerFactory.getLogger(UserDAOImpl.class);
 	
 	@Autowired
@@ -46,8 +57,7 @@ public class UserDAOImpl implements UserDAO
 	 @Autowired
 	 private FileStorageProperties fileStorageProperties;
 	 
-	 @Autowired
-	 private final LevelRepository levelRepository;
+	 
 
 	@Autowired
 	private ReferralRepository referralRepository;
@@ -55,8 +65,10 @@ public class UserDAOImpl implements UserDAO
 	@Autowired
 	private EarningsRepository earningsRepository;
 
-    UserDAOImpl(LevelRepository levelRepository) {
+    UserDAOImpl(LevelRepository levelRepository, OTPOperation OTPOperation, VidhataSocietyMlmBackendApplication vidhataSocietyMlmBackendApplication) {
         this.levelRepository = levelRepository;
+        this.OTPOperation = OTPOperation;
+        this.vidhataSocietyMlmBackendApplication = vidhataSocietyMlmBackendApplication;
     }
 
 	@Transactional
@@ -72,11 +84,11 @@ public class UserDAOImpl implements UserDAO
 		}
 		if (userRepository.findByEmail(user.getEmail()).isPresent()) {
 			logger.warn("User already exists with email: {}", user.getEmail());
-			throw new UserAlreadyExistEmailException("User already exists with email: " + user.getEmail());
+			throw new UserAlreadyExistException("User already exists with email: " + user.getEmail());
 		}
 		if (userRepository.findByPhoneNumber(user.getPhoneNumber()).isPresent()) {
 			logger.warn("User already exists with phone number: {}", user.getPhoneNumber());
-			throw new UserAlreadyExistPhoneNumberException(
+			throw new UserAlreadyExistException(
 					"User already exists with this phone number: " + user.getPhoneNumber());
 		}
 		Earnings earnings = new Earnings();
