@@ -22,7 +22,7 @@ public interface UserRepository extends JpaRepository<User, String>
 	Optional<User> findByPhoneNumber(Long phoneNumber);
 	List<User> findByParent(User parent);
 	List<User> findByRole(Role role);
-	
+	Optional<User> findByIdAndIsActiveTrue(String id);
 	@Lock(LockModeType.PESSIMISTIC_WRITE)
 	@Query("select u from User u where u.id=:id")
 	Optional<User> lockByUserId(@Param("id") String id);

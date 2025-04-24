@@ -305,7 +305,7 @@ public class UserDAOImpl implements UserDAO
 	@Override
 	public Optional<User> findByUserId(String id)
 	{
-		Optional<User> byId = userRepository.findById(id);
+		Optional<User> byId = userRepository.findByIdAndIsActiveTrue(id);
 		if(byId.isPresent())
 		{
 			User user = byId.get();
