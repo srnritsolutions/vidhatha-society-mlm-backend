@@ -2,6 +2,7 @@ package com.srnr.vidhatasocietymlm.user.service;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import com.srnr.vidhatasocietymlm.model.User;
 import com.srnr.vidhatasocietymlm.user.dto.ChangePasswordRequestDTO;
 import com.srnr.vidhatasocietymlm.user.dto.EmailRequestDTO;
 import com.srnr.vidhatasocietymlm.user.dto.RegistrationRequestDTO;
@@ -18,5 +19,6 @@ public interface UserService
       Message verifyUserByEmail(EmailRequestDTO emailRequestDTO);
   	  Message verifyOTP(VerifyOTPRequestDTO verifyOTPRequestDTO);
   	  Message editUserImage(MultipartFile file, String userId);
+  	  User fetchUserById(String userId);
   	  
 }
