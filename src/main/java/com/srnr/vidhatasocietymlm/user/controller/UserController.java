@@ -87,8 +87,7 @@ public class UserController {
 			consumes = {MediaType.APPLICATION_JSON_VALUE},
 			produces = {MediaType.APPLICATION_JSON_VALUE}
 			)
-	public ResponseEntity<?> editProfileImage(MultipartFile file,
-			@PathVariable("userid") @NotBlank(message = "User ID can't be blank or null!") String userId) 
+	public ResponseEntity<?> editProfileImage(@RequestParam MultipartFile file,@RequestParam String userId) 
 	{
 		Message editUserImage = this.userService.editUserImage(file, userId);
 		return  ResponseEntity.status(HttpStatus.OK).body(editUserImage);
