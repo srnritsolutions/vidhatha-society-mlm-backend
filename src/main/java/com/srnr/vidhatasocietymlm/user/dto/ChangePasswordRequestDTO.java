@@ -20,7 +20,7 @@ import lombok.ToString;
 public class ChangePasswordRequestDTO implements Serializable 
 {
 	@NotBlank(message = "Email can't be blank or null !")
-	@Pattern(regexp = "^[a-zA-Z][A-Za-z0-9._%+-]+@gmail\\.com$",message = "Invalid email")
+	@Pattern(regexp = "^[a-zA-Z0-9][A-Za-z0-9._%+-]+@gmail\\.com$",message = "Invalid email")
 	private String  email;
 
 	@NotBlank(message = "Password can't be blank or null !")

@@ -19,6 +19,6 @@ import lombok.ToString;
 public class EmailRequestDTO implements Serializable {
 
 	@NotBlank(message = "Email can't be blank or null !")
-	@Pattern(regexp = "^(?!\\s*$)[a-zA-Z][A-Za-z0-9._%+-]+@gmail\\.com$", message = "Invalid email")
+	@Pattern(regexp = "^(?!\\s*$)[a-zA-Z0-9][A-Za-z0-9._%+-]+@gmail\\.com$", message = "Invalid email")
 	private String email;
 }
