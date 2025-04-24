@@ -1,13 +1,17 @@
 package com.srnr.vidhatasocietymlm.user.service.impl;
 
+import java.util.Arrays;
 import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.srnr.vidhatasocietymlm.exception.GlobalExceptionHandler;
 import com.srnr.vidhatasocietymlm.exception.customexceptions.InvalideOTPException;
+import com.srnr.vidhatasocietymlm.exception.customexceptions.UnSupportedFileTypeException;
 import com.srnr.vidhatasocietymlm.exception.customexceptions.UserNotFoundException;
 import com.srnr.vidhatasocietymlm.exception.customexceptions.UserNotcreatedException;
 import com.srnr.vidhatasocietymlm.mapper.DTOToEntity;
@@ -22,9 +26,9 @@ import com.srnr.vidhatasocietymlm.user.dto.UserResponseDTO;
 import com.srnr.vidhatasocietymlm.user.dto.VerifyOTPRequestDTO;
 import com.srnr.vidhatasocietymlm.user.service.UserService;
 import com.srnr.vidhatasocietymlm.util.EmailSender;
+import com.srnr.vidhatasocietymlm.util.FileStorageProperties;
 import com.srnr.vidhatasocietymlm.util.Message;
 import com.srnr.vidhatasocietymlm.util.OTPOperation;
-
 import jakarta.persistence.PessimisticLockException;
 
 @Service
@@ -40,6 +44,9 @@ public class UserServiceImpl implements UserService
 
 	@Autowired
 	private OTPOperation otpOperation;
+	
+	@Autowired
+	private FileStorageProperties fileStorageProperties;
 
 	UserServiceImpl(GlobalExceptionHandler globalExceptionHandler) {
 		this.globalExceptionHandler = globalExceptionHandler;
@@ -218,5 +225,44 @@ public class UserServiceImpl implements UserService
 			else throw new RuntimeException("User Email can't be null or blank");
 		}
 		else throw new RuntimeException("Password Credential Can't be null");		
+	}
+
+
+	@Override
+	public Message editUserImage(MultipartFile file, String userId) 
+	{
+		if(userId!=null && ! userId.isBlank())
+		{
+			if(file!=null)
+			{
+				Long maxSize = fileStorageProperties.getGetMaxFileSize();
+				if(file.getSize()<=maxSize)
+				{
+					String contentType = file.getContentType();
+					if(contentType.startsWith("image/"))
+					{
+						String fileNameExtension=getFileExtension(file.getOriginalFilename());
+
+						if(Arrays.asList("jpg","jpeg","png","git","tiff","bmp","svg","webp","heif").contains(fileNameExtension.toLowerCase()))
+						{
+							return new Message("jbjhbcbjs");
+						}
+						else throw new UnSupportedFileTypeException("Invalid File Extension.");
+					}
+					else throw new UnSupportedFileTypeException("Invalid File Type ! Only images are allowed");
+				}
+				else throw new RuntimeException("File size exceeds maximum limit! Supported file size "+maxSize);
+			}
+			else throw new RuntimeException("file can't be null");
+		}
+		else throw new RuntimeException("user id can't be null or blank");
+	}
+	
+	public String getFileExtension(String fileName)
+	{
+		int dotIndex=fileName.lastIndexOf(".");
+		if(dotIndex==-1)
+		     throw new UnSupportedFileTypeException("Invalid File");
+	    return fileName.substring(dotIndex+1);
 	}
 }
