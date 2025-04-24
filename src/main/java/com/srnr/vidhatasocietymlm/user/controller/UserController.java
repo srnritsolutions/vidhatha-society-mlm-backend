@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.srnr.vidhatasocietymlm.model.User;
 import com.srnr.vidhatasocietymlm.user.dto.ChangePasswordRequestDTO;
 import com.srnr.vidhatasocietymlm.user.dto.EmailRequestDTO;
 import com.srnr.vidhatasocietymlm.user.dto.LoginRequestDTO;
@@ -93,9 +94,10 @@ public class UserController {
 	}
 	
 	@GetMapping(value = "/get/{userId}", produces = { MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<?> getUserByUserId(@PathVariable @NotBlank(message = "User ID can't be blank or null!") String userId) 
+	public ResponseEntity<?> getUserByUserId(@RequestParam String userId) 
 	{
-		return null;
+		User fetchUserById = this.userService.fetchUserById(userId);
+		return ResponseEntity.status(HttpStatus.FOUND).body(fetchUserById);				
 	}
 
 }
