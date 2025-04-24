@@ -10,7 +10,7 @@ import lombok.Getter;
 @Getter
 public class FileStorageProperties {
 	
-	@Value("{spring.storage.images}")
+	@Value("{file.storage.images}")
 	private String imageStoragePath;
 	
 	
