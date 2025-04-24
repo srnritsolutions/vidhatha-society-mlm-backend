@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.srnr.vidhatasocietymlm.model.User;
 import com.srnr.vidhatasocietymlm.user.dto.ChangePasswordRequestDTO;
 import com.srnr.vidhatasocietymlm.user.dto.EmailRequestDTO;
 import com.srnr.vidhatasocietymlm.user.dto.LoginRequestDTO;
@@ -89,6 +91,13 @@ public class UserController {
 	{
 		Message editUserImage = this.userService.editUserImage(file, userId);
 		return  ResponseEntity.status(HttpStatus.OK).body(editUserImage);
+	}
+	
+	@GetMapping(value = "/get/{userId}", produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<?> getUserByUserId(@RequestParam String userId) 
+	{
+		User fetchUserById = this.userService.fetchUserById(userId);
+		return ResponseEntity.status(HttpStatus.FOUND).body(fetchUserById);				
 	}
 
 }
