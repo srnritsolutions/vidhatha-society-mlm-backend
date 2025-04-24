@@ -84,9 +84,7 @@ public class UserController {
 	}
 
 	@PutMapping(value = "/editProfileImage",
-			consumes = {MediaType.APPLICATION_JSON_VALUE},
-			produces = {MediaType.APPLICATION_JSON_VALUE}
-			)
+			produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<?> editProfileImage(@RequestParam MultipartFile file,@RequestParam String userId) 
 	{
 		Message editUserImage = this.userService.editUserImage(file, userId);
