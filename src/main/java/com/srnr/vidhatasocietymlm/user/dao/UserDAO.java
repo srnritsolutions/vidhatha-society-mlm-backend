@@ -2,6 +2,8 @@ package com.srnr.vidhatasocietymlm.user.dao;
 
 import java.util.Optional;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import com.srnr.vidhatasocietymlm.model.User;
 
 public interface UserDAO 
@@ -12,4 +14,5 @@ public interface UserDAO
 	Optional<User> findByUserPhoneNumber(Long userPhoneNumber);
 	Optional<User> loginByEmailAndPassword(String userEmail, String userPassword);
 	Optional<User> updatePassword(String userEmail, String newPassword);
+	Optional<User> editImage(MultipartFile file,String userId);
 }
