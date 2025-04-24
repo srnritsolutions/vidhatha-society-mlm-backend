@@ -15,4 +15,5 @@ public interface UserDAO
 	Optional<User> loginByEmailAndPassword(String userEmail, String userPassword);
 	Optional<User> updatePassword(String userEmail, String newPassword);
 	Optional<User> editImage(MultipartFile file,String userId);
+	Optional<User> findByUserId(String id);
 }

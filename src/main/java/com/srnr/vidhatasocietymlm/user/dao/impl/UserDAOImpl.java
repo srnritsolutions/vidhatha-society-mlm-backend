@@ -7,6 +7,7 @@ import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,9 +15,6 @@ import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
-
-import com.srnr.vidhatasocietymlm.VidhataSocietyMlmBackendApplication;
-
 import org.springframework.web.multipart.MultipartFile;
 
 import com.srnr.vidhatasocietymlm.appconstants.Role;
@@ -33,22 +31,14 @@ import com.srnr.vidhatasocietymlm.repository.LevelRepository;
 import com.srnr.vidhatasocietymlm.repository.ReferralRepository;
 import com.srnr.vidhatasocietymlm.repository.UserRepository;
 import com.srnr.vidhatasocietymlm.user.dao.UserDAO;
-import com.srnr.vidhatasocietymlm.util.OTPOperation;
 import com.srnr.vidhatasocietymlm.util.FileStorageProperties;
 import com.srnr.vidhatasocietymlm.util.ImageFileNameGenerator;
-
 
 import jakarta.transaction.Transactional;
 
 @Component
-public class UserDAOImpl implements UserDAO {
-
-    private final VidhataSocietyMlmBackendApplication vidhataSocietyMlmBackendApplication;
-
-    private final OTPOperation OTPOperation;
-
-    private final LevelRepository levelRepository;
-
+public class UserDAOImpl implements UserDAO 
+{
 	private static final Logger logger = LoggerFactory.getLogger(UserDAOImpl.class);
 	
 	@Autowired
@@ -56,20 +46,16 @@ public class UserDAOImpl implements UserDAO {
 	
 	 @Autowired
 	 private FileStorageProperties fileStorageProperties;
-	 
-	 
-
+	
 	@Autowired
 	private ReferralRepository referralRepository;
 
 	@Autowired
 	private EarningsRepository earningsRepository;
 
-    UserDAOImpl(LevelRepository levelRepository, OTPOperation OTPOperation, VidhataSocietyMlmBackendApplication vidhataSocietyMlmBackendApplication) {
-        this.levelRepository = levelRepository;
-        this.OTPOperation = OTPOperation;
-        this.vidhataSocietyMlmBackendApplication = vidhataSocietyMlmBackendApplication;
-    }
+	@Autowired
+	private LevelRepository levelRepository;
+
 
 	@Transactional
 	@Retryable(retryFor = {
@@ -160,7 +146,6 @@ public class UserDAOImpl implements UserDAO {
 	@Transactional
 	public Optional<User> updateUserAfterPaymentSuccess(String userId, boolean paymentSuccess) 
 	{
-
 		if (!paymentSuccess) 
 		{
 			logger.warn("User update is not possible due to unsuccessful payment for userId: {}", userId);
@@ -175,8 +160,6 @@ public class UserDAOImpl implements UserDAO {
 			throw new UserNotFoundException("User not found with ID: " + userId);
 		}
 		System.out.println("USer Name:"+user.getName());
-
-		//User user = optionalUser.get();
 		User parent = user.getParent();
 		String referralCode = UUID.randomUUID().toString().replace("-", "").substring(0, 5);
 
@@ -194,25 +177,17 @@ public class UserDAOImpl implements UserDAO {
 					referral.setIsActive(false);
 					referralRepository.save(referral);
 				}				
-				// Update earnings
-//				Earnings earnings = earningsRepository.findById(parent.getId())
-//						.orElse(new Earnings(parent));
-//				double earningsAmount = 250.0; // Example earnings calculation
-//				earnings.setTotalEarnings(earnings.getTotalEarnings() + earningsAmount);
-//				earningsRepository.save(earnings);
 			}			
 		}
 		user.setPaymentSuccess(true);
 		user.setIsActive(true);
 		Referral userReferral = user.getReferral();
-
 		// Create and save referral
 		userReferral.setReferalCode(referralCode);
 		userReferral.setUser(user);
 		userReferral.setIsActive(true);
 		userReferral.setCreatedAt(LocalDateTime.now());
 		referralRepository.save(userReferral);
-
 		Optional<Level> byLevelNum = this.levelRepository.findByLevelNum(user.getUserLevel());
 		user.setReward(byLevelNum.get().getRewards());
 		
@@ -261,7 +236,8 @@ public class UserDAOImpl implements UserDAO {
 		{
 			return byPhoneNumber;
 		}
-		else {
+		else 
+		{
 			return Optional.empty();
 		}
 	}
@@ -294,9 +270,7 @@ public class UserDAOImpl implements UserDAO {
 	    if(!user.getIsActive())
 	    	throw new RuntimeException("User is not active ");
 	    String oldImageFileName=user.getProfileImage();
-	    // Generate a new file name
 	    String fileName = ImageFileNameGenerator.getNewFileName(file.getOriginalFilename());	    
-	    // Update user profile image in db
 	    user.setProfileImage(fileName);
 	    User updatedUser = userRepository.save(user);   
 	  try 
@@ -326,6 +300,22 @@ public class UserDAOImpl implements UserDAO {
 	  {
 		 throw new RuntimeException(e.getMessage());
 	  }     
+	}
+
+	@Override
+	public Optional<User> findByUserId(String id)
+	{
+		Optional<User> byId = userRepository.findById(id);
+		if(byId!=null && !byId.isEmpty())
+		{
+			User user = byId.get();
+			if(user.getIsActive())
+			{
+				return user!=null?Optional.of(user):Optional.empty();
+			}
+			else throw new RuntimeException("user is not active.");
+		}
+		else throw new RuntimeException("user id can not null or empty.");
 	}
 
 }
