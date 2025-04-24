@@ -245,7 +245,12 @@ public class UserServiceImpl implements UserService
 
 						if(Arrays.asList("jpg","jpeg","png","git","tiff","bmp","svg","webp","heif").contains(fileNameExtension.toLowerCase()))
 						{
-							return new Message("jbjhbcbjs");
+							Optional<User> optionalUser = this.userDAO.editImage(file, userId);
+							if(optionalUser.isPresent())
+							{
+								return new Message("Successfully Profile image uploaded");
+							}
+							else throw new RuntimeException("User image Not Updated ! Try again some time.");
 						}
 						else throw new UnSupportedFileTypeException("Invalid File Extension.");
 					}
