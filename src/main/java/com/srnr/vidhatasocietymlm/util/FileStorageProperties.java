@@ -3,6 +3,7 @@ package com.srnr.vidhatasocietymlm.util;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+
 import lombok.Getter;
 
 @Component
@@ -16,6 +17,6 @@ public class FileStorageProperties {
 	@Value("{spring.servlet.multipart.max-file-size}")
 	private Long getMaxFileSize;
 	
-	
-
 }
+
+

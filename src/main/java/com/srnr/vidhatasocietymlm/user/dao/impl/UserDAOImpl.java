@@ -1,9 +1,12 @@
 package com.srnr.vidhatasocietymlm.user.dao.impl;
 
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +16,9 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 
 import com.srnr.vidhatasocietymlm.VidhataSocietyMlmBackendApplication;
+
+import org.springframework.web.multipart.MultipartFile;
+
 import com.srnr.vidhatasocietymlm.appconstants.Role;
 import com.srnr.vidhatasocietymlm.exception.customexceptions.InvalidEmailAndPasswordException;
 import com.srnr.vidhatasocietymlm.exception.customexceptions.InvalidReferralException;
@@ -28,6 +34,9 @@ import com.srnr.vidhatasocietymlm.repository.ReferralRepository;
 import com.srnr.vidhatasocietymlm.repository.UserRepository;
 import com.srnr.vidhatasocietymlm.user.dao.UserDAO;
 import com.srnr.vidhatasocietymlm.util.OTPOperation;
+import com.srnr.vidhatasocietymlm.util.FileStorageProperties;
+import com.srnr.vidhatasocietymlm.util.ImageFileNameGenerator;
+
 
 import jakarta.transaction.Transactional;
 
@@ -39,19 +48,22 @@ public class UserDAOImpl implements UserDAO {
     private final OTPOperation OTPOperation;
 
     private final LevelRepository levelRepository;
+
 	private static final Logger logger = LoggerFactory.getLogger(UserDAOImpl.class);
-	@SuppressWarnings("unused")
-	private static final double REFERRAL_EARNING_AMOUNT = 750.0;
+	
 	@Autowired
 	private UserRepository userRepository;
+	
+	 @Autowired
+	 private FileStorageProperties fileStorageProperties;
+	 
+	 
 
 	@Autowired
 	private ReferralRepository referralRepository;
 
 	@Autowired
 	private EarningsRepository earningsRepository;
-	
- 
 
     UserDAOImpl(LevelRepository levelRepository, OTPOperation OTPOperation, VidhataSocietyMlmBackendApplication vidhataSocietyMlmBackendApplication) {
         this.levelRepository = levelRepository;
@@ -79,10 +91,7 @@ public class UserDAOImpl implements UserDAO {
 			throw new UserAlreadyExistException(
 					"User already exists with this phone number: " + user.getPhoneNumber());
 		}
-
-
 		Earnings earnings = new Earnings();
-
 		Referral referral = new Referral();
 
 		user.setIsActive(false);
@@ -108,17 +117,13 @@ public class UserDAOImpl implements UserDAO {
 						return new InvalidReferralException("Invalid referral code : "+referralCode);
 					}
 							);
-			
-			//parentReferral.setUsedTimes(parentReferral.getUser().getParent().getChildren().size());
 			User getUser = parentReferral.getUser();
 			if (getUser != null && getUser.getChildren() != null) {
 			    parentReferral.setUsedTimes(getUser.getChildren().size()+1);
 			}
 			
-			this.referralRepository.save(parentReferral);
-			
+			this.referralRepository.save(parentReferral);			
 			User parentUser = parentReferral.getUser();
-			
 			// lock parentUser record
 			parentUser = userRepository.lockByUserId(parentUser.getId())
 					.orElseThrow(() -> {
@@ -141,7 +146,6 @@ public class UserDAOImpl implements UserDAO {
 				}
 				savedUser=userRepository.save(user);
 				logger.info("Congratulation {} , your registration successful with referal code : {}",savedUser.getName(),referralCode);
-
 			}
 		}
 		else 
@@ -151,8 +155,6 @@ public class UserDAOImpl implements UserDAO {
 		}  
 		return savedUser!=null?Optional.of(savedUser):Optional.empty();     
 	}
-
-
 
 	@Override
 	@Transactional
@@ -164,18 +166,11 @@ public class UserDAOImpl implements UserDAO {
 			logger.warn("User update is not possible due to unsuccessful payment for userId: {}", userId);
 			throw new RuntimeException("User update is not possible due to unsuccessful payment");
 		}
-
 		if (userId == null || userId.isBlank()) 
 		{
 			throw new IllegalArgumentException("User ID cannot be null or blank");
 		}
-
-		// Optional<User> optionalUser = this.userRepository.findById(userId);
-		//User user = this.userRepository.getReferenceById(userId);
 		User user = this.userRepository.getById(userId);
-		/*if (optionalUser.isEmpty()) {
-            throw new UserNotFoundException("User not found with ID: " + userId);
-        }*/
 		if(user == null) {
 			throw new UserNotFoundException("User not found with ID: " + userId);
 		}
@@ -198,47 +193,34 @@ public class UserDAOImpl implements UserDAO {
 				{
 					referral.setIsActive(false);
 					referralRepository.save(referral);
-				}
-
-				
+				}				
 				// Update earnings
 //				Earnings earnings = earningsRepository.findById(parent.getId())
 //						.orElse(new Earnings(parent));
 //				double earningsAmount = 250.0; // Example earnings calculation
 //				earnings.setTotalEarnings(earnings.getTotalEarnings() + earningsAmount);
 //				earningsRepository.save(earnings);
-			}
-			
+			}			
 		}
-
 		user.setPaymentSuccess(true);
 		user.setIsActive(true);
-
-
 		Referral userReferral = user.getReferral();
 
 		// Create and save referral
-		// Referral userReferral = new Referral();
 		userReferral.setReferalCode(referralCode);
 		userReferral.setUser(user);
 		userReferral.setIsActive(true);
 		userReferral.setCreatedAt(LocalDateTime.now());
 		referralRepository.save(userReferral);
 
-		
 		Optional<Level> byLevelNum = this.levelRepository.findByLevelNum(user.getUserLevel());
 		user.setReward(byLevelNum.get().getRewards());
 		
 		user.setReferral(userReferral);
 		userRepository.save(user);
-		
-
 		return Optional.of(user);
 	}
 
-	
-	
-	
 	@Override
 	public Optional<User> loginByEmailAndPassword(String userEmail, String userPassword) 
 	{
@@ -284,8 +266,6 @@ public class UserDAOImpl implements UserDAO {
 		}
 	}
 
-
-
 	@Override
 	public Optional<User> updatePassword(String userEmail, String newPassword) {
 		Optional<User> byUserEmail = userRepository.findByEmail(userEmail);
@@ -303,4 +283,49 @@ public class UserDAOImpl implements UserDAO {
 		  }
 		  else throw new RuntimeException("User not exist with email : "+userEmail);
 	}
+
+	@Override
+	public Optional<User> editImage(MultipartFile file, String userId) 
+	{
+	    Optional<User> userOptional = userRepository.findById(userId);
+	    if (!userOptional.isPresent()) 
+	    	throw new UserNotFoundException("User does not exist with ID: " + userId);
+	    User user = userOptional.get();
+	    if(!user.getIsActive())
+	    	throw new RuntimeException("User is not active ");
+	    String oldImageFileName=user.getProfileImage();
+	    // Generate a new file name
+	    String fileName = ImageFileNameGenerator.getNewFileName(file.getOriginalFilename());	    
+	    // Update user profile image in db
+	    user.setProfileImage(fileName);
+	    User updatedUser = userRepository.save(user);   
+	  try 
+	  { 
+		    if(updatedUser != null)
+		    {
+		    	//now update image in local driver		    	
+		    	String  targetDirectory=this.fileStorageProperties.getImageStoragePath();		 	  
+		    	//create directories if not exist
+		 		Path path = Paths.get(targetDirectory);		 		
+		 		if(!Files.exists(path))
+				{
+					Files.createDirectories(path);
+				}		 		
+		 		//save the file with new image file name
+		 		Path targetLocation= path.resolve(fileName);
+		 		File oldFile = new File(targetDirectory.concat(oldImageFileName));
+		 		
+		 		 if(oldFile.exists() && !oldImageFileName.equals("default.png"))
+				     oldFile.delete();
+		 		long copied = Files.copy(file.getInputStream(), targetLocation);
+		 		return copied > 0 ? Optional.of(updatedUser) : Optional.empty();	
+		    }
+		    else throw new RuntimeException("User profile not updated successfully!.");
+	  } 
+	  catch (Exception e) 
+	  {
+		 throw new RuntimeException(e.getMessage());
+	  }     
+	}
+
 }
