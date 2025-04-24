@@ -3,12 +3,15 @@ package com.srnr.vidhatasocietymlm.model;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
+
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.srnr.vidhatasocietymlm.appconstants.Role;
 import com.srnr.vidhatasocietymlm.util.CustomeIdGenerator;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

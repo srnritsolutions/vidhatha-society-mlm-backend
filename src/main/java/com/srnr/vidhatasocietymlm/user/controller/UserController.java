@@ -92,11 +92,12 @@ public class UserController {
 		return  ResponseEntity.status(HttpStatus.OK).body(editUserImage);
 	}
 	
-	@GetMapping(value = "/get/{userId}", produces = { MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<?> getUserByUserId(@PathVariable String userId) {
+
+	@GetMapping(value = "/getUserById", produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<?> getUserByUserId(@RequestParam String userId) {
 	    User fetchUserById = this.userService.fetchUserById(userId);
 	    return ResponseEntity.status(HttpStatus.FOUND).body(fetchUserById);              
-	}
 
+	}
 
 }

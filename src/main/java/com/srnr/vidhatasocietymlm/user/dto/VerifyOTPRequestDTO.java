@@ -21,7 +21,7 @@ public class VerifyOTPRequestDTO implements Serializable{
 
 	@NotBlank(message = "Email can't be blank")
 	@NotNull(message = "Name can't be null")
-	@Pattern(regexp = "^[a-zA-Z][A-Za-z0-9._%+-]+@gmail\\.com$",message = "Invalid email")
+	@Pattern(regexp = "^[a-zA-Z0-9][A-Za-z0-9._%+-]+@gmail\\.com$",message = "Invalid email")
 	private String email;
 	
 	@NotBlank(message = "OTP can't be blank")
