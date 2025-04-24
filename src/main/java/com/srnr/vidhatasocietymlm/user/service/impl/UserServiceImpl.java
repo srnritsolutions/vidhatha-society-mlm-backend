@@ -270,4 +270,25 @@ public class UserServiceImpl implements UserService
 		     throw new UnSupportedFileTypeException("Invalid File");
 	    return fileName.substring(dotIndex+1);
 	}
+
+
+	@Override
+	public User fetchUserById(String userId) 
+	{
+		if(userId!=null && ! userId.isBlank())
+		{
+			Optional<User> optionalUser = this.userDAO.findByUserId(userId);
+			if(optionalUser.isPresent())
+			{
+				User user = optionalUser.get();	
+				if(user!=null)
+				{
+					return user;
+				}
+			    else throw new RuntimeException("Something went wrong, try again some time !");
+			}
+			else throw new UserNotFoundException("user not found with id: "+userId);
+		}
+		else throw new RuntimeException("UserID can't be null or blank");
+	}
 }
