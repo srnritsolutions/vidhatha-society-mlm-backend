@@ -25,7 +25,6 @@ import com.srnr.vidhatasocietymlm.user.service.UserService;
 import com.srnr.vidhatasocietymlm.util.Message;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 
 @RestController
 @RequestMapping("/user")
@@ -94,10 +93,10 @@ public class UserController {
 	}
 	
 	@GetMapping(value = "/get/{userId}", produces = { MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<?> getUserByUserId(@RequestParam String userId) 
-	{
-		User fetchUserById = this.userService.fetchUserById(userId);
-		return ResponseEntity.status(HttpStatus.FOUND).body(fetchUserById);				
+	public ResponseEntity<?> getUserByUserId(@PathVariable String userId) {
+	    User fetchUserById = this.userService.fetchUserById(userId);
+	    return ResponseEntity.status(HttpStatus.FOUND).body(fetchUserById);              
 	}
+
 
 }
