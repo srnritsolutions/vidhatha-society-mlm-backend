@@ -22,6 +22,7 @@ import com.srnr.vidhatasocietymlm.user.dao.UserDAO;
 import com.srnr.vidhatasocietymlm.user.dto.ChangePasswordRequestDTO;
 import com.srnr.vidhatasocietymlm.user.dto.EmailRequestDTO;
 import com.srnr.vidhatasocietymlm.user.dto.RegistrationRequestDTO;
+import com.srnr.vidhatasocietymlm.user.dto.UpdateUserRequestDTO;
 import com.srnr.vidhatasocietymlm.user.dto.UserResponseDTO;
 import com.srnr.vidhatasocietymlm.user.dto.VerifyOTPRequestDTO;
 import com.srnr.vidhatasocietymlm.user.service.UserService;
@@ -290,5 +291,26 @@ public class UserServiceImpl implements UserService
 			else throw new UserNotFoundException("user not found with id: "+userId);
 		}
 		else throw new RuntimeException("UserID can't be null or blank");
+	}
+
+
+	@Override
+	public Message updateUserByUserId(UpdateUserRequestDTO userRequestDTO, String userId)
+	{
+		if(userRequestDTO!=null)
+		{
+			User userEntity = DTOToEntity.userUpdateRequestDtoToUserEntity(userRequestDTO);
+			if(userEntity!=null)
+			{
+				Optional<User> updateUser = this.userDAO.updateByUserId(userEntity, userId);
+				if(updateUser.isPresent())
+				{
+					return new Message("Successfully Updated User Details");
+				}
+				else throw new RuntimeException("User Not Updated , Try After Some Time");
+			}
+			else throw new RuntimeException("Something went wrong , while converting RequestDTO to User !");
+		}
+		else throw new RuntimeException("UpdateUserRequestDTO can't be null");
 	}
 }
