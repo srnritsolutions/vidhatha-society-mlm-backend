@@ -335,7 +335,7 @@ public class UserDAOImpl implements UserDAO
 							if(!user.getEmail().equals(oldUser.getEmail()))
 							{
 								flag=true;
-							    if (userRepository.findByEmail(user.getEmail())!=null) 
+							    if (userRepository.findByEmail(user.getEmail()).isPresent()) 
 							   {
 							        throw new UserAlreadyExistException("User already exists with email: " + user.getEmail());
 							   }
@@ -351,7 +351,7 @@ public class UserDAOImpl implements UserDAO
 							 if(!user.getPhoneNumber().equals(oldUser.getPhoneNumber())) 
 							 {
 								 flag=true;
-								 if(userRepository.findByPhoneNumber(user.getPhoneNumber())!=null)
+								 if(userRepository.findByPhoneNumber(user.getPhoneNumber()).isPresent())
 								 {
 									 throw new UserAlreadyExistException("User already exists with phonenumber: " + user.getPhoneNumber());
 								 }
