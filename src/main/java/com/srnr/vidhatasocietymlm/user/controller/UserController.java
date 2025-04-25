@@ -18,6 +18,7 @@ import com.srnr.vidhatasocietymlm.user.dto.ChangePasswordRequestDTO;
 import com.srnr.vidhatasocietymlm.user.dto.EmailRequestDTO;
 import com.srnr.vidhatasocietymlm.user.dto.LoginRequestDTO;
 import com.srnr.vidhatasocietymlm.user.dto.RegistrationRequestDTO;
+import com.srnr.vidhatasocietymlm.user.dto.UpdateUserRequestDTO;
 import com.srnr.vidhatasocietymlm.user.dto.UserResponseDTO;
 import com.srnr.vidhatasocietymlm.user.dto.VerifyOTPRequestDTO;
 import com.srnr.vidhatasocietymlm.user.service.UserService;
@@ -99,4 +100,8 @@ public class UserController {
 
 	}
 
+	@PostMapping(value = "/updateUserById")
+	public ResponseEntity<?> updateUserById(@RequestBody UpdateUserRequestDTO updateUserRequestDTO,@RequestParam String userId) {
+		return null;
+	}
 }
