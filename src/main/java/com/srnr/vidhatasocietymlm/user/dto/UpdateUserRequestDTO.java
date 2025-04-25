@@ -1,12 +1,24 @@
 package com.srnr.vidhatasocietymlm.user.dto;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
-public class UpdateUserRequestDTO 
+@SuppressWarnings("serial")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString
+public class UpdateUserRequestDTO implements Serializable
 {
 	@NotBlank(message="Name Can't Be Blank or null !")
 	@Pattern(regexp = "^[A-Za-z ]+$",message = "Name must Combine Uppercase and LowerCase letters")

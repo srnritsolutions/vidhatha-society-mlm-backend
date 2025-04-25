@@ -6,6 +6,7 @@ import com.srnr.vidhatasocietymlm.model.User;
 import com.srnr.vidhatasocietymlm.user.dto.ChangePasswordRequestDTO;
 import com.srnr.vidhatasocietymlm.user.dto.EmailRequestDTO;
 import com.srnr.vidhatasocietymlm.user.dto.RegistrationRequestDTO;
+import com.srnr.vidhatasocietymlm.user.dto.UpdateUserRequestDTO;
 import com.srnr.vidhatasocietymlm.user.dto.UserResponseDTO;
 import com.srnr.vidhatasocietymlm.user.dto.VerifyOTPRequestDTO;
 import com.srnr.vidhatasocietymlm.util.Message;
@@ -20,5 +21,6 @@ public interface UserService
   	  Message verifyOTP(VerifyOTPRequestDTO verifyOTPRequestDTO);
   	  Message editUserImage(MultipartFile file, String userId);
   	  User fetchUserById(String userId);
+  	  Message updateUserByUserId(UpdateUserRequestDTO userRequestDTO,String userId);
   	  
 }

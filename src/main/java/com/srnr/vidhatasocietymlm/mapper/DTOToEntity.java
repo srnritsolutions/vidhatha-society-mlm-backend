@@ -10,6 +10,7 @@ import com.srnr.vidhatasocietymlm.model.Address;
 import com.srnr.vidhatasocietymlm.model.User;
 import com.srnr.vidhatasocietymlm.user.dto.AddressRequestDTO;
 import com.srnr.vidhatasocietymlm.user.dto.RegistrationRequestDTO;
+import com.srnr.vidhatasocietymlm.user.dto.UpdateUserRequestDTO;
 
 public class DTOToEntity 
 {
@@ -35,6 +36,28 @@ public class DTOToEntity
 		user.setTermsAndConditions(registrationRequestDTO.getTermsAndConditions());
 		
 		
+		return user;
+	
+	}
+	
+	public static User userUpdateRequestDtoToUserEntity(UpdateUserRequestDTO updateUserRequestDTO)
+	{
+		User user=new User();
+		
+		AddressRequestDTO addressRequestDTO =updateUserRequestDTO.getAddressRequestDTO();
+		Address address = new Address();
+		BeanUtils.copyProperties(addressRequestDTO, address);
+		
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+		LocalDate dob = LocalDate.parse(updateUserRequestDTO.getAddressRequestDTO().getDateOfBirth().toString(),formatter);
+		address.setDob(dob);
+		address.setUser(user);
+		user.setAddresses(address);
+		user.setChildren(new ArrayList<>());
+		user.setEmail(updateUserRequestDTO.getUserEmail());
+		user.setName(updateUserRequestDTO.getUserName());
+		user.setPhoneNumber( Long.parseLong(updateUserRequestDTO.getUserPhone()));
+
 		return user;
 	
 	}
