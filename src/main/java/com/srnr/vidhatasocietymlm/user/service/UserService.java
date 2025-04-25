@@ -5,6 +5,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.srnr.vidhatasocietymlm.model.User;
 import com.srnr.vidhatasocietymlm.user.dto.ChangePasswordRequestDTO;
 import com.srnr.vidhatasocietymlm.user.dto.EmailRequestDTO;
+import com.srnr.vidhatasocietymlm.user.dto.LoginWithPhoneRequestDTO;
 import com.srnr.vidhatasocietymlm.user.dto.RegistrationRequestDTO;
 import com.srnr.vidhatasocietymlm.user.dto.UpdateUserRequestDTO;
 import com.srnr.vidhatasocietymlm.user.dto.UserResponseDTO;
@@ -22,5 +23,5 @@ public interface UserService
   	  Message editUserImage(MultipartFile file, String userId);
   	  User fetchUserById(String userId);
   	  Message updateUserByUserId(UpdateUserRequestDTO userRequestDTO,String userId);
-  	  
+  	  Message loginWithPhoneAndPassword(LoginWithPhoneRequestDTO loginWithPhoneRequestDTO);
 }

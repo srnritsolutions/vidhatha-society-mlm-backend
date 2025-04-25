@@ -19,8 +19,10 @@ import com.srnr.vidhatasocietymlm.mapper.EntityToDTO;
 import com.srnr.vidhatasocietymlm.model.User;
 
 import com.srnr.vidhatasocietymlm.user.dao.UserDAO;
+import com.srnr.vidhatasocietymlm.user.dao.impl.UserDAOImpl;
 import com.srnr.vidhatasocietymlm.user.dto.ChangePasswordRequestDTO;
 import com.srnr.vidhatasocietymlm.user.dto.EmailRequestDTO;
+import com.srnr.vidhatasocietymlm.user.dto.LoginWithPhoneRequestDTO;
 import com.srnr.vidhatasocietymlm.user.dto.RegistrationRequestDTO;
 import com.srnr.vidhatasocietymlm.user.dto.UpdateUserRequestDTO;
 import com.srnr.vidhatasocietymlm.user.dto.UserResponseDTO;
@@ -36,6 +38,8 @@ import jakarta.persistence.PessimisticLockException;
 public class UserServiceImpl implements UserService
 {
 
+    private final UserDAOImpl userDAOImpl;
+
 	private final GlobalExceptionHandler globalExceptionHandler;
 
 	private Logger logger=LoggerFactory.getLogger(UserServiceImpl.class);
@@ -49,8 +53,9 @@ public class UserServiceImpl implements UserService
 	@Autowired
 	private FileStorageProperties fileStorageProperties;
 
-	UserServiceImpl(GlobalExceptionHandler globalExceptionHandler) {
+	UserServiceImpl(GlobalExceptionHandler globalExceptionHandler, UserDAOImpl userDAOImpl) {
 		this.globalExceptionHandler = globalExceptionHandler;
+		this.userDAOImpl = userDAOImpl;
 	}
 
 
@@ -140,7 +145,7 @@ public class UserServiceImpl implements UserService
 					Optional<User> userFetchedByEmailAndPassword = this.userDAO.loginByEmailAndPassword(email,password);
 					if(userFetchedByEmailAndPassword.isPresent())
 					{
-						return "login Succesfull";
+						return "login Succesfull with Email";
 					}
 					else throw new RuntimeException("User is not active");
 				}
@@ -312,5 +317,30 @@ public class UserServiceImpl implements UserService
 			else throw new RuntimeException("Something went wrong , while converting RequestDTO to User !");
 		}
 		else throw new RuntimeException("UpdateUserRequestDTO can't be null");
+	}
+
+
+	@Override
+	public Message loginWithPhoneAndPassword(LoginWithPhoneRequestDTO loginWithPhoneRequestDTO)
+	{
+		if(loginWithPhoneRequestDTO!=null)
+		{
+			if(loginWithPhoneRequestDTO.getPhoneNumber()!=null && ! loginWithPhoneRequestDTO.getPhoneNumber().isBlank())
+			{
+				if(loginWithPhoneRequestDTO.getPassword()!=null && ! loginWithPhoneRequestDTO.getPassword().isBlank())
+				{
+					Long phoneNumber=Long.parseLong(loginWithPhoneRequestDTO.getPhoneNumber());
+					Optional<User> optionalUser = this.userDAO.loginByPhoneNumberAndPassword(phoneNumber, loginWithPhoneRequestDTO.getPassword());
+					if(optionalUser.isPresent())
+					{
+						return new Message("Successfully login with Phone Number");
+					}
+					else throw new UserNotFoundException("User Not Found with Phone Number: "+loginWithPhoneRequestDTO.getPhoneNumber());
+				}
+				else throw new RuntimeException("Password can't be null or blank");
+			}
+			else throw new RuntimeException("Phone NUmber can't be null or blank");
+		}
+		else throw new RuntimeException("LoginWithPhoneAndPassword can't be null or blank");
 	}
 }
