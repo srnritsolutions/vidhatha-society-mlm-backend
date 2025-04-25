@@ -7,6 +7,7 @@ import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,8 +16,10 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
+
 import com.srnr.vidhatasocietymlm.appconstants.Role;
 import com.srnr.vidhatasocietymlm.exception.customexceptions.InvalidEmailAndPasswordException;
+import com.srnr.vidhatasocietymlm.exception.customexceptions.InvalidPhoneNumberAndPasswordException;
 import com.srnr.vidhatasocietymlm.exception.customexceptions.InvalidReferralException;
 import com.srnr.vidhatasocietymlm.exception.customexceptions.UserAlreadyExistException;
 import com.srnr.vidhatasocietymlm.exception.customexceptions.UserNotFoundException;
@@ -32,6 +35,7 @@ import com.srnr.vidhatasocietymlm.repository.UserRepository;
 import com.srnr.vidhatasocietymlm.user.dao.UserDAO;
 import com.srnr.vidhatasocietymlm.util.FileStorageProperties;
 import com.srnr.vidhatasocietymlm.util.ImageFileNameGenerator;
+
 import jakarta.transaction.Transactional;
 
 @Component
@@ -193,7 +197,7 @@ public class UserDAOImpl implements UserDAO {
 		if (user.isPresent()) {
 			return user;
 		} else
-			throw new InvalidEmailAndPasswordException("Invalid credentials: phonenumber or password incorrect.");
+			throw new InvalidPhoneNumberAndPasswordException("Invalid credentials: phonenumber or password incorrect.");
 	}
 
 	@Override
