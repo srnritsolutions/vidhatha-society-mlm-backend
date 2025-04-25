@@ -189,7 +189,7 @@ public class UserDAOImpl implements UserDAO {
 
 	@Override
 	public Optional<User> loginByPhoneNumberAndPassword(Long phoneNumber, String userPassword) {
-		Optional<User> user = userRepository.findByPhoneNumberAndPassword(null, userPassword);
+		Optional<User> user = userRepository.findByPhoneNumberAndPassword(phoneNumber, userPassword);
 		if (user.isPresent()) {
 			return user;
 		} else
