@@ -16,7 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.srnr.vidhatasocietymlm.model.User;
 import com.srnr.vidhatasocietymlm.user.dto.ChangePasswordRequestDTO;
 import com.srnr.vidhatasocietymlm.user.dto.EmailRequestDTO;
-import com.srnr.vidhatasocietymlm.user.dto.LoginRequestDTO;
+import com.srnr.vidhatasocietymlm.user.dto.LoginWithEmailRequestDTO;
 import com.srnr.vidhatasocietymlm.user.dto.RegistrationRequestDTO;
 import com.srnr.vidhatasocietymlm.user.dto.UpdateUserRequestDTO;
 import com.srnr.vidhatasocietymlm.user.dto.UserResponseDTO;
@@ -49,13 +49,23 @@ public class UserController {
 	}
 
 	@PostMapping(
-			value = "/login",
+			value = "/loginWithEmail",
 			consumes = MediaType.APPLICATION_JSON_VALUE,
 			produces = MediaType.APPLICATION_JSON_VALUE
 			)
-	public ResponseEntity<?> userLoginByEmailAndPassword(@Valid @RequestBody LoginRequestDTO dto) {
+	public ResponseEntity<?> userLoginByEmailAndPassword(@Valid @RequestBody LoginWithEmailRequestDTO dto) {
 		String loginUserByEmailAndPassword = userService.loginUserByEmailAndPassword(dto.getEmail(), dto.getPassword());
 		return ResponseEntity.status(HttpStatus.OK).body(new Message(loginUserByEmailAndPassword));
+	}
+	
+	@PostMapping(
+			value = "/loginWithPhoneNumber",
+			consumes = MediaType.APPLICATION_JSON_VALUE,
+			produces = MediaType.APPLICATION_JSON_VALUE
+			)
+	public ResponseEntity<?> userLoginWithPhoneNumberAndPassword(@Valid @RequestBody LoginWithEmailRequestDTO dto)
+	{
+		return null;
 	}
 
 	@PostMapping(value = "/verifyEmail", consumes = { MediaType.APPLICATION_JSON_VALUE }, 
