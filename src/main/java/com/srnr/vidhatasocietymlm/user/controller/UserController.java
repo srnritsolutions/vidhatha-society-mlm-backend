@@ -18,6 +18,7 @@ import com.srnr.vidhatasocietymlm.user.dto.ChangePasswordRequestDTO;
 import com.srnr.vidhatasocietymlm.user.dto.EmailRequestDTO;
 import com.srnr.vidhatasocietymlm.user.dto.LoginRequestDTO;
 import com.srnr.vidhatasocietymlm.user.dto.RegistrationRequestDTO;
+import com.srnr.vidhatasocietymlm.user.dto.UpdateUserRequestDTO;
 import com.srnr.vidhatasocietymlm.user.dto.UserResponseDTO;
 import com.srnr.vidhatasocietymlm.user.dto.VerifyOTPRequestDTO;
 import com.srnr.vidhatasocietymlm.user.service.UserService;
@@ -90,13 +91,17 @@ public class UserController {
 		Message editUserImage = this.userService.editUserImage(file, userId);
 		return  ResponseEntity.status(HttpStatus.OK).body(editUserImage);
 	}
-	
+
 
 	@GetMapping(value = "/getUserById", produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<?> getUserByUserId(@RequestParam String userId) {
-	    User fetchUserById = this.userService.fetchUserById(userId);
-	    return ResponseEntity.status(HttpStatus.FOUND).body(fetchUserById);              
+		User fetchUserById = this.userService.fetchUserById(userId);
+		return ResponseEntity.status(HttpStatus.FOUND).body(fetchUserById);              
 
 	}
 
+	@PostMapping(value = "/updateUserById")
+	public ResponseEntity<?> updateUserById(@RequestBody UpdateUserRequestDTO updateUserRequestDTO,@RequestParam String userId) {
+		return null;
+	}
 }
