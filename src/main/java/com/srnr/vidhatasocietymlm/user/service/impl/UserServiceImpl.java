@@ -132,7 +132,7 @@ public class UserServiceImpl implements UserService
 	{
 		if((email!=null &&  ! email.isBlank()) && (password!=null && ! password.isBlank()))
 		{
-			if(email.matches("^[a-zA-Z][A-Za-z0-9._%+-]+@gmail\\.com$"))
+			if(email.matches("^(?!\\s*$)[a-zA-Z0-9][A-Za-z0-9._%+-]+@gmail\\.com$"))
 			{
 				if(password.length()>=6)
 				{

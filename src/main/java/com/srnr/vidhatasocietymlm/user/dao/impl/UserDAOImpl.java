@@ -7,7 +7,6 @@ import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,12 +15,12 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
-
 import com.srnr.vidhatasocietymlm.appconstants.Role;
 import com.srnr.vidhatasocietymlm.exception.customexceptions.InvalidEmailAndPasswordException;
 import com.srnr.vidhatasocietymlm.exception.customexceptions.InvalidReferralException;
 import com.srnr.vidhatasocietymlm.exception.customexceptions.UserAlreadyExistException;
 import com.srnr.vidhatasocietymlm.exception.customexceptions.UserNotFoundException;
+import com.srnr.vidhatasocietymlm.model.Address;
 import com.srnr.vidhatasocietymlm.model.Earnings;
 import com.srnr.vidhatasocietymlm.model.Level;
 import com.srnr.vidhatasocietymlm.model.Referral;
@@ -33,7 +32,6 @@ import com.srnr.vidhatasocietymlm.repository.UserRepository;
 import com.srnr.vidhatasocietymlm.user.dao.UserDAO;
 import com.srnr.vidhatasocietymlm.util.FileStorageProperties;
 import com.srnr.vidhatasocietymlm.util.ImageFileNameGenerator;
-
 import jakarta.transaction.Transactional;
 
 @Component
@@ -316,6 +314,121 @@ public class UserDAOImpl implements UserDAO
 			else throw new RuntimeException("user is not active.");
 		}
 		else throw new UserNotFoundException("user not found with userId : "+id);
+	}
+
+	@Override
+	public Optional<User> updateByUserId(User user, String userId) {
+		boolean flag=false;
+		if(user!=null)
+		{
+			if(userId!=null && !userId.isBlank()) 
+			{
+				Optional<User> byId = userRepository.findById(userId);
+				
+				if(byId.isPresent()) 
+				{
+					User oldUser = byId.get();
+					if(oldUser.getIsActive())
+					{
+						 if(user.getEmail()!=null && !user.getEmail().isBlank())
+						 {
+							if(!user.getEmail().equals(oldUser.getEmail()))
+							{
+								flag=true;
+							    if (userRepository.findByEmail(user.getEmail())!=null) 
+							   {
+							        throw new UserAlreadyExistException("User already exists with email: " + user.getEmail());
+							   }
+							    oldUser.setEmail(user.getEmail());
+							}
+						 }
+						 else throw new RuntimeException("user email must not be null or blank!.");
+						 
+						 String newPhonNo=String.valueOf(user.getPhoneNumber());
+				
+						 if(user.getPhoneNumber()!=null && (newPhonNo.length()==10 && !newPhonNo.startsWith("0")) )
+						 {
+							 if(!user.getPhoneNumber().equals(oldUser.getPhoneNumber())) 
+							 {
+								 flag=true;
+								 if(userRepository.findByPhoneNumber(user.getPhoneNumber())!=null)
+								 {
+									 throw new UserAlreadyExistException("User already exists with phonenumber: " + user.getPhoneNumber());
+								 }
+								 oldUser.setPhoneNumber(user.getPhoneNumber());
+							 }
+						 }
+						 else throw new RuntimeException("user phoneNo must not be null and not start with '0' and length must be 10 digits.");
+						 
+	
+						 if(user.getName()!=null && !user.getName().isBlank())
+						 {
+							 if(!user.getName().equals(oldUser.getName()))
+							 {
+								 flag=true;
+							      oldUser.setName(user.getName());
+							 }     				
+						 }
+						 else throw new RuntimeException("user name must be null or blank!.");
+						 Address newAddress = user.getAddresses();
+						    Address oldAddress = oldUser.getAddresses();
+						    if (newAddress != null) {
+						        if (oldAddress == null) {
+						            oldAddress = new Address();
+						            oldAddress.setUser(oldUser); // establishing the bidirectional link
+						        }
+						        // City
+						        if (newAddress.getCity() != null && !newAddress.getCity().isBlank()) {
+						            if (!newAddress.getCity().equals(oldAddress.getCity())) {
+						                oldAddress.setCity(newAddress.getCity());
+						                flag = true;
+						            }
+						        }
+						        // State
+						        if (newAddress.getState() != null && !newAddress.getState().isBlank()) {
+						            if (!newAddress.getState().equals(oldAddress.getState())) {
+						                oldAddress.setState(newAddress.getState());
+						                flag = true;
+						            }
+						        }
+						        // Pincode
+						        if (newAddress.getPinCode() != null && !newAddress.getPinCode().isBlank()) {
+						            if (!newAddress.getPinCode().equals(oldAddress.getPinCode())) {
+						                oldAddress.setPinCode(newAddress.getPinCode());
+						                flag = true;
+						            }
+						        }
+						        // Full Address
+						        if (newAddress.getFullAddress() != null && !newAddress.getFullAddress().isBlank()) {
+						            if (!newAddress.getFullAddress().equals(oldAddress.getFullAddress())) {
+						                oldAddress.setFullAddress(newAddress.getFullAddress());
+						                flag = true;
+						            }
+						        }
+						        // DOB
+						        if (newAddress.getDob() != null) {
+						            if (!newAddress.getDob().equals(oldAddress.getDob())) {
+						                oldAddress.setDob(newAddress.getDob());
+						                flag = true;
+						            }
+						        }
+						        oldUser.setAddresses(oldAddress);
+						    }
+
+						 if(flag)
+						       oldUser = userRepository.save(oldUser);
+						return oldUser != null ? Optional.of(oldUser) : Optional.empty();
+						
+					}
+					else throw new RuntimeException("user is not active");			
+				}
+				else throw new UserNotFoundException("User not exist with id : "+userId);
+				
+			}
+			else throw new UserNotFoundException("User id can't be null or blank!"); 
+			
+		}
+		else throw new RuntimeException("User can't be null!"); 		
 	}
 
 }
