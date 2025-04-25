@@ -17,6 +17,7 @@ import com.srnr.vidhatasocietymlm.model.User;
 import com.srnr.vidhatasocietymlm.user.dto.ChangePasswordRequestDTO;
 import com.srnr.vidhatasocietymlm.user.dto.EmailRequestDTO;
 import com.srnr.vidhatasocietymlm.user.dto.LoginWithEmailRequestDTO;
+import com.srnr.vidhatasocietymlm.user.dto.LoginWithPhoneRequestDTO;
 import com.srnr.vidhatasocietymlm.user.dto.RegistrationRequestDTO;
 import com.srnr.vidhatasocietymlm.user.dto.UpdateUserRequestDTO;
 import com.srnr.vidhatasocietymlm.user.dto.UserResponseDTO;
@@ -54,7 +55,7 @@ public class UserController {
 			produces = MediaType.APPLICATION_JSON_VALUE
 			)
 	public ResponseEntity<?> userLoginByEmailAndPassword(@Valid @RequestBody LoginWithEmailRequestDTO dto) {
-		String loginUserByEmailAndPassword = userService.loginUserByEmailAndPassword(dto.getEmail(), dto.getPassword());
+		String loginUserByEmailAndPassword =this.userService.loginUserByEmailAndPassword(dto.getEmail(), dto.getPassword());
 		return ResponseEntity.status(HttpStatus.OK).body(new Message(loginUserByEmailAndPassword));
 	}
 	
@@ -63,9 +64,10 @@ public class UserController {
 			consumes = MediaType.APPLICATION_JSON_VALUE,
 			produces = MediaType.APPLICATION_JSON_VALUE
 			)
-	public ResponseEntity<?> userLoginWithPhoneNumberAndPassword(@Valid @RequestBody LoginWithEmailRequestDTO dto)
+	public ResponseEntity<?> userLoginWithPhoneNumberAndPassword(@Valid @RequestBody LoginWithPhoneRequestDTO dto)
 	{
-		return null;
+	     Message loginWithPhoneAndPassword = this.userService.loginWithPhoneAndPassword(dto);
+	     return ResponseEntity.status(HttpStatus.OK).body(loginWithPhoneAndPassword);
 	}
 
 	@PostMapping(value = "/verifyEmail", consumes = { MediaType.APPLICATION_JSON_VALUE }, 
