@@ -100,8 +100,9 @@ public class UserController {
 
 	}
 
-	@PostMapping(value = "/updateUserById")
+	@PutMapping(value = "/updateUserById")
 	public ResponseEntity<?> updateUserById(@RequestBody UpdateUserRequestDTO updateUserRequestDTO,@RequestParam String userId) {
-		return null;
+		Message updateUserByUserId = this.userService.updateUserByUserId(updateUserRequestDTO, userId);
+		return  ResponseEntity.status(HttpStatus.OK).body(updateUserByUserId);
 	}
 }
