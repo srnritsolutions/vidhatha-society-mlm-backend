@@ -54,9 +54,9 @@ public class DTOToEntity
 		address.setUser(user);
 		user.setAddresses(address);
 		user.setChildren(new ArrayList<>());
-		user.setEmail(updateUserRequestDTO.getUserEmail());
-		user.setName(updateUserRequestDTO.getUserName());
-		user.setPhoneNumber( Long.parseLong(updateUserRequestDTO.getUserPhone()));
+		user.setEmail(updateUserRequestDTO.getEmail());
+		user.setName(updateUserRequestDTO.getName());
+		user.setPhoneNumber( Long.parseLong(updateUserRequestDTO.getPhoneNumber()));
 
 		return user;
 	
